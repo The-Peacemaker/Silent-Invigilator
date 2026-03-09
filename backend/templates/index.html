@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="The Silent Invigilator — Autonomous real-time exam malpractice detection system using behavioral analysis.">
+    <title>The Silent Invigilator — Live Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <div class="app-shell">
+
+        <!-- ════════════════════════════════════════════
+       TOP BAR
+       ════════════════════════════════════════════ -->
+        <header class="top-bar">
+            <div class="brand">
+                ✏️ The Silent Invigilator
+                <span>Autonomous Exam Malpractice Detection</span>
+            </div>
+            <div class="sys-meta">
+                <a href="/dashboard" class="pill"
+                    style="text-decoration:none; color:var(--ink); border-color:var(--ink); margin-right:5px;">📋
+                    LOGS</a>
+                <a href="/logout" class="pill"
+                    style="text-decoration:none; color:var(--danger); border-color:var(--danger); margin-right:10px;">EXIT</a>
+                <span id="clock-display" class="pill">00:00:00</span>
+                <span id="fps-display" class="pill">FPS: —</span>
+                <span id="conn-pill" class="pill offline">⬤ OFFLINE</span>
+            </div>
+        </header>
+
+        <!-- ════════════════════════════════════════════
+       MAIN CONTENT
+       ════════════════════════════════════════════ -->
+        <div class="main-grid">
+
+            <!-- ── LEFT COLUMN ───────────────────────────── -->
+            <div class="left-col">
+
+                <!-- MAIN MONITORING VIEW (SDD 7.1) -->
+                <div class="sketch-box video-panel">
+
+                    <!-- HUD overlay (non-interactive) -->
+                    <div class="video-hud">
+                        <div class="hud-corner hud-tl" id="hud-tl">CAM_01 // EXAM HALL</div>
+                        <div class="hud-corner hud-tr" id="hud-tr">⬤ LIVE</div>
+                        <div class="hud-corner hud-bl" id="hud-bl">YOLOv8 + MediaPipe</div>
+                        <div class="hud-corner hud-br" id="hud-br" style="font-size:0.6rem;">GROUP 10 — CSE-B</div>
+                    </div>
+
+                    <!-- Live video stream from /video_feed -->
+                    <img id="video-stream" class="video-stream" src="/video_feed"
+                        alt="NO SIGNAL — Camera initializing..." title="Live exam monitoring feed">
+
+                    <!-- Alert overlay (shown when risk > 70) -->
+                    <div id="video-alert-overlay" class="video-alert-overlay">
+                        <div class="alert-badge">
+                            <h2>⚠ VIOLATION DETECTED</h2>
+                            <p id="overlay-reason">Malpractice Detected</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- BEHAVIOR METRICS BAR (SDD — Outputs: yaw, pitch, gaze, FPS, confidence) -->
+                <div class="metrics-bar">
+                    <div class="sketch-box metric-card">
+                        <span class="m-label">Head Yaw</span>
+                        <span class="m-value" id="met-yaw">0°</span>
+                        <span class="m-sub">Left / Right</span>
+                    </div>
+                    <div class="sketch-box metric-card">
+                        <span class="m-label">Head Pitch</span>
+                        <span class="m-value" id="met-pitch">0°</span>
+                        <span class="m-sub">Up / Down</span>
+                    </div>
+                    <div class="sketch-box metric-card">
+                        <span class="m-label">Gaze Dir.</span>
+                        <span class="m-value" id="met-gaze">—</span>
+                        <span class="m-sub">Eye Position</span>
+                    </div>
+                    <div class="sketch-box metric-card">
+                        <span class="m-label">Persons</span>
+                        <span class="m-value" id="met-persons">0</span>
+                        <span class="m-sub">In Frame</span>
+                    </div>
+                    <div class="sketch-box metric-card">
+                        <span class="m-label">Total Alerts</span>
+                        <span class="m-value" id="met-alerts">0</span>
+                        <span class="m-sub">This Session</span>
+                    </div>
+                </div>
+
+            </div><!-- /left-col -->
+
+            <!-- ── RIGHT COLUMN ──────────────────────────── -->
+            <div class="right-col">
+
+                <!-- 1. RISK / THREAT LEVEL PANEL -->
+                <div class="sketch-box risk-panel">
+                    <div class="panel-title">
+                        <span class="dot" style="background:var(--danger)"></span>
+                        Risk Level
+                    </div>
+                    <div class="risk-score-row">
+                        <div class="risk-number" id="risk-number">00</div>
+                        <div class="risk-label">
+                            <span style="color:var(--ink-very-faint);font-size:0.6rem;">ANOMALY SCORE</span>
+                            <strong id="risk-level-text">NORMAL</strong>
+                        </div>
+                    </div>
+                    <!-- SDD-spec color: green < 30, orange < 70, red >= 70 -->
+                    <div class="sketch-progress">
+                        <div class="sketch-progress-fill" id="risk-bar" style="width:0%"></div>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;margin-top:3px;font-size:0.58rem;color:var(--pencil);font-family:var(--font-mono);">
+                        <span>0 — Focused</span>
+                        <span>50 — Suspicious</span>
+                        <span>100 — Critical</span>
+                    </div>
+                </div>
+
+                <!-- 2. STATUS PANEL (SDD 7.1 — Color-coded indicators) -->
+                <div class="sketch-box" style="padding:10px;">
+                    <div class="panel-title">
+                        <span class="dot" style="background:var(--focused)"></span>
+                        Detection Status
+                    </div>
+                    <div class="status-grid" style="padding:0;gap:5px;">
+
+                        <!-- Face Present -->
+                        <div class="sketch-box status-item" id="si-face">
+                            <span class="si-label">📷 Face Scan</span>
+                            <span class="si-value" id="si-face-val">Scanning…</span>
+                        </div>
+
+                        <!-- Head Pose -->
+                        <div class="sketch-box status-item" id="si-pose">
+                            <span class="si-label">🧭 Head Pose</span>
+                            <span class="si-value" id="si-pose-val">Center</span>
+                        </div>
+
+                        <!-- Gaze -->
+                        <div class="sketch-box status-item" id="si-gaze">
+                            <span class="si-label">👁 Gaze</span>
+                            <span class="si-value" id="si-gaze-val">Focused</span>
+                        </div>
+
+                        <!-- Phone Detection -->
+                        <div class="sketch-box status-item" id="si-phone">
+                            <span class="si-label">📱 Object Det.</span>
+                            <span class="si-value" id="si-phone-val">None</span>
+                        </div>
+
+                    </div>
+
+                    <!-- Behavioral Classification Label -->
+                    <div
+                        style="margin-top:8px;padding:6px 8px;background:var(--focused-bg);border:1.5px solid var(--focused);border-radius:2px;">
+                        <span
+                            style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--pencil);">Behavioral
+                            State</span>
+                        <div id="behavior-state"
+                            style="font-family:var(--font-sketch);font-size:1.1rem;font-weight:700;color:var(--focused);">
+                            ✓ Focused</div>
+                    </div>
+                </div>
+
+                <!-- 3. HEAD POSE ESTIMATION PANEL (SDD — solvePnP angles) -->
+                <div class="sketch-box head-pose-panel">
+                    <div class="panel-title">
+                        <span class="dot" style="background:var(--warn)"></span>
+                        Head Pose Analysis
+                    </div>
+
+                    <div class="pose-row">
+                        <span class="pr-label">Yaw (L/R)</span>
+                        <div class="pose-bar-wrap">
+                            <div class="pose-bar-fill" id="pb-yaw" style="width:50%"></div>
+                        </div>
+                        <span class="pr-val" id="pv-yaw">0°</span>
+                    </div>
+
+                    <div class="pose-row">
+                        <span class="pr-label">Pitch (U/D)</span>
+                        <div class="pose-bar-wrap">
+                            <div class="pose-bar-fill" id="pb-pitch" style="width:50%"></div>
+                        </div>
+                        <span class="pr-val" id="pv-pitch">0°</span>
+                    </div>
+
+                    <div class="pose-row"
+                        style="border-top:1px dashed var(--paper-line);padding-top:5px;margin-top:3px;">
+                        <span class="pr-label">Threshold</span>
+                        <div class="pose-bar-wrap"></div>
+                        <span class="pr-val" style="font-size:0.65rem;color:var(--pencil);">±25° / ±20°</span>
+                    </div>
+                </div>
+
+                <!-- 4. ANOMALY SCORE CHART (Temporal Data) -->
+                <div class="sketch-box chart-panel">
+                    <div class="panel-title">
+                        <span class="dot" style="background:var(--ink)"></span>
+                        Temporal Anomaly Score
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="anomalyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 5. ALERT & NOTIFICATION PANEL (SDD 7.1) -->
+                <div class="sketch-box alert-panel">
+                    <div class="panel-title" style="justify-content:space-between;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="dot" style="background:var(--danger)"></span>
+                            Alert Log
+                        </div>
+                        <button onclick="clearAlerts()"
+                            style="font-family:var(--font-mono);font-size:0.6rem;border:1px solid var(--ink);background:var(--paper);padding:1px 7px;cursor:pointer;border-radius:2px;color:var(--pencil);">
+                            Clear
+                        </button>
+                    </div>
+                    <div class="alert-log" id="alert-log">
+                        <div class="no-alerts">No alerts — system monitoring normally ✓</div>
+                    </div>
+                </div>
+
+                <!-- 6. CONFIGURATION PANEL (SDD — sensitivity, camera, thresholds) -->
+                <div class="sketch-box config-panel">
+                    <div class="panel-title">
+                        <span class="dot" style="background:var(--ink-faint)"></span>
+                        Configuration
+                    </div>
+
+                    <div class="config-row">
+                        <label for="cfg-sens">Detection Sensitivity</label>
+                        <input type="range" id="cfg-sens" class="sketch-slider" min="1" max="10" value="7"
+                            oninput="document.getElementById('cfg-sens-val').textContent = this.value">
+                        <span id="cfg-sens-val"
+                            style="font-family:var(--font-sketch);width:20px;text-align:right;">7</span>
+                    </div>
+
+                    <div class="config-row">
+                        <label for="cfg-yaw-th">Yaw Threshold</label>
+                        <input type="range" id="cfg-yaw-th" class="sketch-slider" min="10" max="45" value="25"
+                            oninput="document.getElementById('cfg-yaw-val').textContent = this.value + '°'">
+                        <span id="cfg-yaw-val"
+                            style="font-family:var(--font-sketch);width:28px;text-align:right;">25°</span>
+                    </div>
+
+                    <div class="config-row">
+                        <label for="cfg-pitch-th">Pitch Threshold</label>
+                        <input type="range" id="cfg-pitch-th" class="sketch-slider" min="10" max="35" value="20"
+                            oninput="document.getElementById('cfg-pitch-val').textContent = this.value + '°'">
+                        <span id="cfg-pitch-val"
+                            style="font-family:var(--font-sketch);width:28px;text-align:right;">20°</span>
+                    </div>
+
+                    <div class="config-row">
+                        <label for="cfg-cam">Camera Source</label>
+                        <select id="cfg-cam" class="sketch-select">
+                            <option value="0">Webcam 0 (Default)</option>
+                            <option value="1">Webcam 1</option>
+                        </select>
+                    </div>
+
+                    <div class="config-row">
+                        <label for="cfg-alert-thresh">Alert Threshold</label>
+                        <input type="range" id="cfg-alert-thresh" class="sketch-slider" min="30" max="90" value="60"
+                            oninput="document.getElementById('cfg-at-val').textContent = this.value">
+                        <span id="cfg-at-val"
+                            style="font-family:var(--font-sketch);width:20px;text-align:right;">60</span>
+                    </div>
+                </div>
+
+                <!-- Session Info Footer -->
+                <div
+                    style="padding:6px 10px;font-family:var(--font-mono);font-size:0.6rem;color:var(--ink-very-faint);text-align:center;border-top:1px dashed var(--paper-line);">
+                    Group No. 10 · CSE-B · VIT Bangalore ·
+                    Benedict Chacko · Davood Jamal · Judith K Vijesh · Muhammed Jamaludheen
+                </div>
+
+            </div><!-- /right-col -->
+
+        </div><!-- /main-grid -->
+
+    </div><!-- /app-shell -->
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher's Log Dashboard — Silent Invigilator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            padding: 20px;
+        }
+
+        .log-container {
+            background: var(--paper);
+            padding: 0 40px;
+            min-height: 90vh;
+            border-left: 5px double var(--ink);
+            /* Notebook spine */
+            margin: 0 auto;
+            max-width: 1200px;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            border-bottom: 2px solid var(--ink);
+            font-family: var(--font-sketch);
+            font-size: 1.2rem;
+            padding: 10px;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px dashed var(--paper-line);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .high-risk {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .medium-risk {
+            color: var(--warn);
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-top: 20px;
+            font-family: var(--font-mono);
+        }
+
+        .back-btn {
+            color: var(--ink);
+            text-decoration: none;
+            border: 1px solid var(--ink);
+            padding: 5px 15px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .h-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border: 1px solid currentColor;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+
+        .h-badge.danger {
+            color: var(--danger);
+            background: var(--danger-bg);
+        }
+
+        .h-badge.warn {
+            color: var(--warn);
+            background: var(--warn-bg);
+        }
+
+        .h-badge.info {
+            color: var(--focused);
+            background: var(--focused-bg);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="log-container">
+        <div class="nav-bar">
+            <a href="/" class="back-btn">← Back to Monitoring</a>
+
+            <div style="text-align:right;">
+                <strong>Invigilator:</strong> {{ session.get('user', 'Unknown') }}
+                <br>
+                <a href="/logout" style="color:var(--danger); font-size:0.8rem;">[ Sign Out ]</a>
+            </div>
+        </div>
+
+        <h1 style="font-family:var(--font-sketch); text-align:center; margin-bottom:10px;">
+            Suspicious Activity Log
+        </h1>
+        <div style="text-align:center; font-family:var(--font-mono); color:var(--pencil); margin-bottom:40px;">
+            — Confidential Examination Record —
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="15%">Time</th>
+                    <th width="15%">Risk Level</th>
+                    <th width="50%">Description / Detection</th>
+                    <th width="20%">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td style="font-family:var(--font-mono); color:var(--pencil);">{{ log.timestamp }}</td>
+                    <td>
+                        {% if log.risk_score >= 70 %}
+                        <span class="h-badge danger">CRITICAL</span>
+                        {% elif log.risk_score >= 40 %}
+                        <span class="h-badge warn">WARN</span>
+                        {% else %}
+                        <span class="h-badge info">INFO</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ log.event_type }}</strong>
+                        <br>
+                        <span style="font-size:0.85rem; color:var(--ink-faint);">{{ log.description }}</span>
+                    </td>
+                    <td style="font-family:var(--font-sketch); font-size:1.2rem; font-weight:bold;">
+                        {{ log.risk_score }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align:center; padding:40px; color:var(--pencil);">
+                        No suspicious incidents recorded yet. Good job!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top:50px; text-align:center;">
+            <form action="/clear_logs" method="POST"
+                onsubmit="return confirm('Are you sure you want to shred these records?');">
+                <button
+                    style="border:none; background:none; color:var(--danger); text-decoration:underline; cursor:pointer; font-family:var(--font-mono);">
+                    [ Shred Confiscated Logs ]
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

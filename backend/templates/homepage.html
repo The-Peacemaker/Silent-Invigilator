@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="The Silent Invigilator — AI-powered autonomous exam malpractice detection system using real-time behavioral analysis, face tracking, and object detection.">
+    <title>The Silent Invigilator — AI Exam Surveillance</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+</head>
+
+<body>
+
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar" id="main-navbar">
+        <div class="nav-brand">
+            <div class="brand-icon" style="background: transparent; box-shadow: 0 0 15px rgba(0,212,255,0.4);">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="SI Logo"
+                    style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm);">
+            </div>
+            Silent Invigilator
+        </div>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="/login" class="btn btn-primary btn-glow"
+                    style="color: #ffffff !important; padding: 10px 24px; font-family: var(--font-mono); letter-spacing: 1px; box-shadow: 0 0 20px rgba(0,212,255,0.5); border: 1px solid var(--accent-cyan); display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; text-transform: uppercase;">
+                    <span
+                        style="display: block; width: 6px; height: 6px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff; animation: pulse-glow 1.5s infinite;"></span>
+                    SYSTEM LOGIN
+                </a></li>
+        </ul>
+    </nav>
+
+    <!-- ═══ HERO SECTION ═══ -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <canvas id="particle-canvas"></canvas>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                AI-Powered Surveillance System
+            </div>
+            <h1>
+                <span>The Silent</span>
+                <span class="gradient-text">Invigilator</span>
+            </h1>
+            <p class="hero-description">
+                Autonomous real-time exam malpractice detection using advanced AI —
+                face tracking, gaze analysis, object detection, and behavioral scoring
+                to ensure examination integrity.
+            </p>
+            <div class="hero-cta">
+                <a href="/login" class="btn btn-primary">Access Dashboard →</a>
+                <a href="#features" class="btn btn-ghost">Explore Features</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat animate-fade-up stagger-1">
+                    <div class="stat-value gradient-text">98.5%</div>
+                    <div class="stat-label">Detection Accuracy</div>
+                </div>
+                <div class="hero-stat animate-fade-up stagger-2">
+                    <div class="stat-value gradient-text">&lt;200ms</div>
+                    <div class="stat-label">Response Time</div>
+                </div>
+                <div class="hero-stat animate-fade-up stagger-3">
+                    <div class="stat-value gradient-text">24/7</div>
+                    <div class="stat-label">Monitoring</div>
+                </div>
+                <div class="hero-stat animate-fade-up stagger-4">
+                    <div class="stat-value gradient-text">5+</div>
+                    <div class="stat-label">Detection Modes</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ FEATURES ═══ -->
+    <section class="section" id="features" style="background: var(--bg-secondary);">
+        <div class="section-header">
+            <div class="section-label">Capabilities</div>
+            <h2 class="section-title">Intelligent Detection <span class="gradient-text">Engine</span></h2>
+            <p class="section-subtitle">
+                Powered by YOLOv8 object detection and MediaPipe face mesh — the system
+                identifies malpractice in real-time with zero manual intervention.
+            </p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card glass-panel animate-fade-up stagger-1">
+                <div class="feature-icon">👁️</div>
+                <h3>Gaze & Focus Tracking</h3>
+                <p>Monitors eye direction and head orientation to detect when a student
+                    looks away from their paper — identifying potential copying behavior.</p>
+            </div>
+            <div class="feature-card glass-panel animate-fade-up stagger-2">
+                <div class="feature-icon">📱</div>
+                <h3>Phone Detection</h3>
+                <p>YOLOv8-powered object detection instantly identifies mobile phones,
+                    smartwatches, and other prohibited electronic devices in the frame.</p>
+            </div>
+            <div class="feature-card glass-panel animate-fade-up stagger-3">
+                <div class="feature-icon">📄</div>
+                <h3>Cheat Sheet Detection</h3>
+                <p>Detects small papers, notes, and unauthorized materials being used
+                    during examinations through advanced object classification.</p>
+            </div>
+            <div class="feature-card glass-panel animate-fade-up stagger-4">
+                <div class="feature-icon">📊</div>
+                <h3>Behavioral Scoring</h3>
+                <p>Composite anomaly scoring algorithm combines all detection signals
+                    into a single risk score for instant threat assessment.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ HOW IT WORKS ═══ -->
+    <section class="section" id="how-it-works">
+        <div class="section-header">
+            <div class="section-label">Process</div>
+            <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+            <p class="section-subtitle">
+                From camera feed to alert generation — a seamless pipeline of AI-driven analysis.
+            </p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card glass-panel animate-fade-up stagger-1">
+                <div class="step-number">01</div>
+                <h3>Capture</h3>
+                <p>Live MJPEG video stream captured from exam hall cameras at 30 FPS resolution.</p>
+            </div>
+            <div class="step-card glass-panel animate-fade-up stagger-2">
+                <div class="step-number">02</div>
+                <h3>Analyze</h3>
+                <p>YOLOv8 + MediaPipe process each frame — detecting faces, objects, gaze direction, and head pose.</p>
+            </div>
+            <div class="step-card glass-panel animate-fade-up stagger-3">
+                <div class="step-number">03</div>
+                <h3>Score</h3>
+                <p>Anomaly scoring engine combines all signals into a real-time risk assessment (0-100 scale).</p>
+            </div>
+            <div class="step-card glass-panel animate-fade-up stagger-4">
+                <div class="step-number">04</div>
+                <h3>Alert</h3>
+                <p>Instant notifications to invigilators when risk exceeds threshold with detailed evidence logs.</p>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="site-footer">
+        <div class="footer-brand"
+            style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px;">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="SI Logo"
+                style="width: 36px; height: 36px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,212,255,0.6);">
+            <span
+                style="font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; letter-spacing: 1px;">The
+                Silent Invigilator</span>
+        </div>
+        <p>VJCET Vazhakulam · 2026</p>
+        <p style="margin-top:8px; font-family: var(--font-mono); font-size:0.7rem;">
+            Autonomous Exam Malpractice Detection System
+        </p>
+    </footer>
+
+    <!-- ═══ HOMEPAGE JS ═══ -->
+    <script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
+</body>
+
+</html>

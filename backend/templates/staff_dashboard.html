@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard — Silent Invigilator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard cyber-dashboard">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar glass-panel"
+            style="border-right: 1px solid rgba(0, 212, 255, 0.2); box-shadow: 4px 0 24px rgba(0,0,0,0.4);">
+            <div class="sidebar-brand">
+                <div class="brand-icon"
+                    style="font-weight: 800; font-family: var(--font-display); color: white; background: var(--accent-gradient); box-shadow: 0 0 15px rgba(0,212,255,0.4);">
+                    SI
+                </div>
+                <div>
+                    <h2 style="text-shadow: 0 0 10px rgba(255,255,255,0.2);">Silent Invigilator</h2>
+                    <span class="role-badge"
+                        style="background: rgba(245, 158, 11, 0.2); border: 1px solid var(--status-warn); color: var(--status-warn); text-shadow: 0 0 5px rgba(245, 158, 11, 0.5);">Staff
+                        Invigilator [Lvl 1]</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label" style="color: var(--accent-cyan-dim);">Main</div>
+                <a href="/staff" class="sidebar-link active"
+                    style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-cyan);">
+                    <span class="link-icon" style="font-weight: 700; color: var(--accent-cyan);">#</span> Overview
+                </a>
+                <a href="#alerts-section" class="sidebar-link hover-glow" onclick="scrollToSection('alerts-section')">
+                    <span class="link-icon" style="font-weight: 700;">!</span> Alert Feed
+                </a>
+                <div class="nav-section-label" style="color: var(--accent-cyan-dim); margin-top: 15px;">Monitoring</div>
+                <a href="/monitor" class="sidebar-link monitor-link" style="position: relative; overflow: hidden;">
+                    <span class="link-icon" style="font-weight: 700; color: var(--status-safe);">▶</span> Live Camera
+                    Feed
+                    <span class="live-dot"
+                        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; background: var(--status-danger); border-radius: 50%; animation: pulse-glow 2s infinite;"></span>
+                </a>
+                <div class="nav-section-label" style="color: var(--accent-cyan-dim); margin-top: 15px;">Account</div>
+                <a href="/" class="sidebar-link hover-glow">
+                    <span class="link-icon" style="font-weight: 700;">⌂</span> Homepage
+                </a>
+                <a href="/logout" class="sidebar-link hover-glow" style="color: var(--status-danger);">
+                    <span class="link-icon" style="font-weight: 700;">✕</span> Sign Out
+                </a>
+            </nav>
+            <div class="sidebar-footer" style="border-top: 1px solid rgba(255,255,255,0.05);">
+                <div class="sidebar-user">
+                    <div class="user-avatar" style="background: linear-gradient(135deg, #10b981, #059669);">{{
+                        session.get('full_name', 'S')[0] }}</div>
+                    <div class="user-info">
+                        <div class="user-name" style="font-weight: 600;">{{ session.get('full_name', 'Staff') }}</div>
+                        <div class="user-role-text"
+                            style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">ID: {{
+                            session.get('user_id', 'S-001') }}</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="dash-main">
+            <!-- Animated cyber background grid -->
+            <div class="cyber-grid" style="opacity: 0.3; pointer-events: none;"></div>
+
+            <div class="dash-header" style="position: relative; z-index: 1;">
+                <h1
+                    style="text-shadow: 0 0 15px rgba(255,255,255,0.1); letter-spacing: 1px; font-family: var(--font-display);">
+                    Surveillance Overview <span
+                        style="font-size: 1rem; color: var(--text-muted); font-weight: 400; letter-spacing: 2px;">//
+                        STAFF</span></h1>
+                <div class="header-meta">
+                    <a href="/monitor" class="btn btn-primary btn-sm btn-glow"
+                        style="box-shadow: 0 0 15px rgba(0,212,255,0.3);">▶ Open Live Feed</a>
+                    <span id="current-time" class="badge badge-info"
+                        style="font-size:0.75rem; font-family: var(--font-mono); border: 1px solid rgba(0,212,255,0.3);"></span>
+                </div>
+            </div>
+
+            <!-- ── STATS CARDS ── -->
+            <div class="stats-grid" style="position: relative; z-index: 1;">
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon red"
+                        style="color: var(--status-danger); font-weight: bold; text-shadow: 0 0 10px rgba(239,68,68,0.5);">
+                        !</div>
+                    <div class="stat-number" id="stat-total" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Total Alerts Today</div>
+                </div>
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon yellow"
+                        style="color: var(--status-warn); font-weight: bold; text-shadow: 0 0 10px rgba(245,158,11,0.5);">
+                        ⚠</div>
+                    <div class="stat-number" id="stat-critical" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Critical Alerts</div>
+                </div>
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon cyan"
+                        style="color: var(--accent-cyan); font-weight: bold; text-shadow: 0 0 10px rgba(0,212,255,0.5);">
+                        i</div>
+                    <div class="stat-number" id="stat-warnings" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Warnings</div>
+                </div>
+            </div>
+
+            <!-- ── QUICK MONITOR CARD ── -->
+            <div class="glass-panel cyber-hover"
+                style="padding:24px; margin-bottom:24px; text-align:center; position: relative; z-index: 1; border: 1px solid rgba(0,212,255,0.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                <div
+                    style="font-size:2.5rem; margin-bottom:12px; font-weight: 800; color: var(--accent-cyan); text-shadow: 0 0 15px rgba(0,212,255,0.5);">
+                    ▶</div>
+                <h3
+                    style="font-family:var(--font-display); font-size:1.2rem; margin-bottom:8px; letter-spacing: 1px; text-transform: uppercase;">
+                    Live Camera Monitoring</h3>
+                <p
+                    style="color:var(--text-secondary); margin-bottom:20px; font-size:0.9rem; font-family: var(--font-mono);">
+                    Access the real-time video feed with AI-powered malpractice detection overlay.
+                </p>
+                <a href="/monitor" class="btn btn-primary btn-glow"
+                    style="padding:12px 32px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px;">
+                    Launch Live Feed →
+                </a>
+            </div>
+
+            <!-- ── REAL-TIME ALERT FEED ── -->
+            <div class="data-table-wrap glass-panel" id="alerts-section"
+                style="position: relative; z-index: 1; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="table-header"
+                    style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+                    <h3 style="font-family: var(--font-display); letter-spacing: 1px;"><span
+                            style="color: var(--accent-cyan);">//</span> Recent Alert Feed</h3>
+                    <span class="badge badge-info" id="alert-count" style="font-family: var(--font-mono);">0
+                        alerts</span>
+                </div>
+                <div class="alert-list" id="alerts-list">
+                    <div class="empty-state">
+                        <div class="cyber-scanline" style="height: 2px;"></div>
+                        <p style="font-family: var(--font-mono);">Awaiting data uplink...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        /* ── Clock ── */
+        function updateClock() {
+            const now = new Date();
+            const el = document.getElementById('current-time');
+            if (el) el.textContent = now.toLocaleTimeString('en-GB', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function scrollToSection(id) {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* ── Load Data ── */
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                document.getElementById('stat-total').textContent = data.total_alerts;
+                document.getElementById('stat-critical').textContent = data.critical_alerts;
+                document.getElementById('stat-warnings').textContent = data.warning_alerts;
+            } catch (e) { console.error('Stats error:', e); }
+        }
+
+        async function loadAlerts() {
+            try {
+                const res = await fetch('/api/alerts?limit=30');
+                const logs = await res.json();
+                const list = document.getElementById('alerts-list');
+                const countEl = document.getElementById('alert-count');
+                countEl.textContent = `${logs.length} alerts`;
+
+                if (logs.length === 0) {
+                    list.innerHTML = '<div class="empty-state"><div class="empty-icon" style="opacity: 0.5;">-</div><p>No alerts — all clear</p></div>';
+                    return;
+                }
+
+                list.innerHTML = logs.map(log => {
+                    let sevClass = 'severity-info';
+                    if (log.risk_score >= 70) sevClass = 'severity-critical';
+                    else if (log.risk_score >= 40) sevClass = 'severity-warning';
+
+                    return `<div class="alert-item ${sevClass}">
+                    <span class="alert-time">${log.timestamp.substring(11)}</span>
+                    <div class="alert-content">
+                        <div class="alert-type">${log.event_type}</div>
+                        <div class="alert-desc">${log.description}</div>
+                    </div>
+                    <span class="badge ${log.risk_score >= 70 ? 'badge-danger' : log.risk_score >= 40 ? 'badge-warn' : 'badge-info'}">${log.risk_score}</span>
+                </div>`;
+                }).join('');
+            } catch (e) { console.error('Alerts error:', e); }
+        }
+
+        loadStats();
+        loadAlerts();
+        // Auto-refresh
+        setInterval(() => { loadStats(); loadAlerts(); }, 10000);
+    </script>
+</body>
+
+</html>
