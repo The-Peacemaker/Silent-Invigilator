@@ -127,35 +127,71 @@ def get_camera(init=True):
 def background_monitor():
     """
     Background thread that monitors detection state.
-    If risk > 60, it logs an event to SQLite.
-    Only runs if the camera has been initialized.
+    Logs specific high-risk events (Phone, Material, etc.) to SQLite.
     """
     print("[INFO] Background Logger Started")
-    last_log_time = 0
-    COOLDOWN = 10
+    
+    # Track last log time per specific event type to prevent database spam
+    last_log = {
+        'phone': 0,
+        'material': 0,
+        'proximity': 0,
+        'audio': 0,
+        'missing': 0,
+        'general': 0
+    }
+    COOLDOWN = 15  # 15 seconds cooldown per event type
 
     while True:
         try:
             cam = get_camera(init=False)
             if cam:
-                if cam.anomaly_score > 60 and (time.time() - last_log_time > COOLDOWN):
-                    conn = sqlite3.connect(DB_FILE)
+                now = time.time()
+                conn = None
+                
+                # Check specific critical events first
+                if cam.phone_detected and (now - last_log['phone'] > COOLDOWN):
+                    conn = get_db_connection()
                     with conn:
-                        ts = time.strftime('%Y-%m-%d %H:%M:%S')
-                        evt_type = "Suspicious Behavior"
-                        if cam.phone_detected: evt_type = "PROHIBITED OBJECT (PHONE)"
-                        elif "Proximity" in str(cam.detections): evt_type = "COLLUSION (PROXIMITY)"
-                        elif "Talking" in str(cam.detections): evt_type = "AUDIO VIOLATION"
-                        
-                        desc = ", ".join(cam.detections) if cam.detections else "High Anomaly Score detected"
                         conn.execute("INSERT INTO logs (timestamp, risk_score, event_type, description) VALUES (?, ?, ?, ?)",
-                                     (ts, cam.anomaly_score, evt_type, desc))
-                        print(f"[LOG] Alert saved: {evt_type} ({cam.anomaly_score})")
-                        last_log_time = time.time()
+                                     (time.strftime('%Y-%m-%d %H:%M:%S'), max(cam.anomaly_score, 80), 'PROHIBITED OBJECT (PHONE)', 'PHONE DETECTED - Mobile device on camera'))
+                        last_log['phone'] = now
+                        print(f"[LOG] Alert saved: PHONE DETECTED ({cam.anomaly_score})")
+
+                elif any("Material" in x for x in getattr(cam, 'detections', [])) and (now - last_log['material'] > COOLDOWN):
+                    if not conn: conn = get_db_connection()
+                    with conn:
+                        conn.execute("INSERT INTO logs (timestamp, risk_score, event_type, description) VALUES (?, ?, ?, ?)",
+                                     (time.strftime('%Y-%m-%d %H:%M:%S'), max(cam.anomaly_score, 60), 'SUSPICIOUS MATERIAL', 'Book or Paper detected on camera'))
+                        last_log['material'] = now
+                        print(f"[LOG] Alert saved: MATERIAL DETECTED ({cam.anomaly_score})")
+
+                elif not getattr(cam, 'face_detected', False) and len(getattr(cam, 'cached_persons', [])) > 0 and (now - last_log['missing'] > COOLDOWN):
+                    if not conn: conn = get_db_connection()
+                    with conn:
+                        conn.execute("INSERT INTO logs (timestamp, risk_score, event_type, description) VALUES (?, ?, ?, ?)",
+                                     (time.strftime('%Y-%m-%d %H:%M:%S'), max(cam.anomaly_score, 50), 'FACE HIDDEN', 'Person detected but face is invisible/hidden'))
+                        last_log['missing'] = now
+                        print(f"[LOG] Alert saved: FACE HIDDEN ({cam.anomaly_score})")
+
+                # Fallback to general high anomaly score
+                elif cam.anomaly_score > 60 and (now - last_log['general'] > COOLDOWN):
+                    # Only log general anomaly if we didn't just log a specific one
+                    if (now - max(last_log.values())) > 5:
+                        if not conn: conn = get_db_connection()
+                        with conn:
+                            desc = ", ".join(cam.detections) if cam.detections else "High Anomaly Score detected (Aggregated behaviors)"
+                            conn.execute("INSERT INTO logs (timestamp, risk_score, event_type, description) VALUES (?, ?, ?, ?)",
+                                         (time.strftime('%Y-%m-%d %H:%M:%S'), cam.anomaly_score, 'Suspicious Behavior', desc))
+                            last_log['general'] = now
+                            print(f"[LOG] Alert saved: Suspicious Behavior ({cam.anomaly_score})")
+
+                if conn:
                     conn.close()
-            
+
             time.sleep(1)
         except Exception as e:
+            print(f"[Logger] Error: {e}")
             time.sleep(1)
 
 # ── PUBLIC ROUTES ────────────────────────────────────────
