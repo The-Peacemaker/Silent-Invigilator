@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Silent Invigilator</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+</head>
+
+<body>
+
+    <div class="login-page">
+        <!-- Animated cyber elements -->
+        <div class="cyber-scanline"></div>
+        <div class="cyber-grid"></div>
+
+        <div class="login-card glass-panel"
+            style="backdrop-filter: blur(25px); border: 1px solid rgba(0, 212, 255, 0.2); box-shadow: 0 0 40px rgba(0, 212, 255, 0.1), inset 0 0 20px rgba(124, 58, 237, 0.05);">
+            <div style="text-align:center; margin-bottom:8px;">
+                <div
+                    style="display:inline-flex; width:64px; height:64px; border-radius:var(--radius-md); align-items:center; justify-content:center; margin-bottom:12px; box-shadow: 0 0 30px rgba(0, 212, 255, 0.4); background:transparent;">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="SI Logo"
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md);">
+                </div>
+            </div>
+            <h2 style="text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,212,255,0.3);">
+                System Access</h2>
+            <p class="login-subtitle"
+                style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 1px;">
+                Secure Surveillance Gateway</p>
+
+            {% if error %}
+            <div class="login-error" style="border-left: 4px solid var(--status-danger);">
+                <span style="font-weight: 800; margin-right: 4px;">⚠</span> {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/login">
+                <div class="form-group">
+                    <label class="form-label" style="color: var(--accent-cyan-dim); font-weight: 600;"
+                        for="username">Operator ID</label>
+                    <input type="text" name="username" id="username" class="form-input cyber-input"
+                        placeholder="Enter identification code" autofocus required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="color: var(--accent-cyan-dim); font-weight: 600;"
+                        for="password">Passphrase</label>
+                    <input type="password" name="password" id="password" class="form-input cyber-input"
+                        placeholder="Enter security passphrase" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="color: var(--accent-cyan-dim); font-weight: 600;"
+                        for="role">Clearance Level</label>
+                    <select name="role" id="role" class="form-select cyber-input" required>
+                        <option value="" disabled selected>Select clearance level</option>
+                        <option value="admin">Administrator [Lvl 3]</option>
+                        <option value="teacher">Teacher [Lvl 2]</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-glow"
+                    style="width:100%; padding:16px; font-family: var(--font-mono); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; border-radius: 4px; position: relative; overflow: hidden;">
+                    <span style="position: relative; z-index: 1;">Initialize Uplink</span>
+                </button>
+            </form>
+
+            <div class="login-footer"
+                style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; margin-top: 30px;">
+                <p
+                    style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                    Warning: Unauthorized access is strictly prohibited and logged.</p>
+                <p style="margin-top:12px;">
+                    <a href="/"
+                        style="color: var(--text-secondary); font-size:0.8rem; display: inline-flex; align-items: center; gap: 4px; transition: color 0.3s;"
+                        onmouseover="this.style.color='var(--accent-cyan)'"
+                        onmouseout="this.style.color='var(--text-secondary)'"><span style="font-size: 1.2rem;">←</span>
+                        Abort sequence</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

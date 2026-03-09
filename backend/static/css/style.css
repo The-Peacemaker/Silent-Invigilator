@@ -1,0 +1,756 @@
+/* =========================================================
+   THE SILENT INVIGILATOR — SKETCH / NOTEBOOK THEME
+   Matches SDD 7.1 UI Design Spec
+   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Special+Elite&family=Kalam:wght@300;400;700&display=swap');
+
+/* ── DESIGN TOKENS ───────────────────────────────────────── */
+:root {
+    --paper: #faf7f0;
+    --paper-dark: #f0ebe0;
+    --paper-line: #d9cfc0;
+    --ink: #1a1a2e;
+    --ink-faint: #4a4a6a;
+    --ink-very-faint: #9a94b0;
+    --pencil: #5a5a7a;
+
+    /* Status colors — per SDD 7.1 */
+    --focused: #2d8a4e;
+    /* Green — Focused */
+    --focused-bg: #e8f5ed;
+    --warn: #c8900a;
+    /* Yellow — Looking L/R */
+    --warn-bg: #fef9e6;
+    --alert: #b5600a;
+    /* Orange — Looking Up/Down */
+    --alert-bg: #fef0e6;
+    --danger: #c0392b;
+    /* Red — Suspicious / Phone */
+    --danger-bg: #fdeaea;
+
+    --sketch-border: 2px solid var(--ink);
+    --font-sketch: 'Caveat', cursive;
+    --font-mono: 'Special Elite', cursive;
+    --font-body: 'Kalam', cursive;
+}
+
+/* ── RESET & BASE ────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--paper);
+    background-image:
+        /* Graph-paper lines */
+        linear-gradient(rgba(70, 130, 180, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(70, 130, 180, 0.08) 1px, transparent 1px),
+        linear-gradient(rgba(70, 130, 180, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(70, 130, 180, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px, 60px 60px, 12px 12px, 12px 12px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    height: 100vh;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+/* ── SKETCH UTILITY CLASSES ──────────────────────────────── */
+/* Wobbly border illusion via box-shadow offsets */
+.sketch-box {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 2px 6px 3px 5px / 5px 3px 6px 2px;
+    /* "hand-drawn" rounding */
+    box-shadow:
+        1px 1px 0 var(--ink),
+        2px 2px 0 var(--ink),
+        /* paper texture shadow */
+        inset 0 0 30px rgba(0, 0, 0, 0.03);
+    position: relative;
+}
+
+.sketch-box::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px dashed rgba(0, 0, 0, 0.08);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* ── APP SHELL ───────────────────────────────────────────── */
+.app-shell {
+    display: grid;
+    grid-template-rows: 52px 1fr;
+    height: 100vh;
+}
+
+/* ── TOP NAVBAR ──────────────────────────────────────────── */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    background: var(--ink);
+    border-bottom: 3px solid #000;
+    /* small paper-looking stripe */
+    box-shadow: 0 2px 0 var(--paper-line), 0 4px 0 var(--paper);
+}
+
+.top-bar .brand {
+    font-family: var(--font-sketch);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--paper);
+    letter-spacing: 1px;
+}
+
+.top-bar .brand span {
+    font-size: 0.75rem;
+    opacity: 0.65;
+    margin-left: 8px;
+    font-weight: 400;
+    font-family: var(--font-mono);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.top-bar .sys-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--paper-line);
+}
+
+.sys-meta .pill {
+    padding: 2px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pill.live {
+    background: var(--focused);
+    color: #fff;
+    border-color: var(--focused);
+    animation: pulse-live 2s ease-in-out infinite;
+}
+
+.pill.offline {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+@keyframes pulse-live {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* ── MAIN CONTENT GRID ───────────────────────────────────── */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 10px;
+    padding: 10px;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* ── LEFT COLUMN ─────────────────────────────────────────── */
+.left-col {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 10px;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* ── VIDEO PANEL ─────────────────────────────────────────── */
+.video-panel {
+    position: relative;
+    background: #111;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* corner brackets — hand-drawn corner feel */
+.video-panel::before,
+.video-panel::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: #ffcc00;
+    border-style: solid;
+    z-index: 10;
+}
+
+.video-panel::before {
+    top: 8px;
+    left: 8px;
+    border-width: 3px 0 0 3px;
+}
+
+.video-panel::after {
+    bottom: 8px;
+    right: 8px;
+    border-width: 0 3px 3px 0;
+}
+
+.video-hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.hud-corner {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: rgba(255, 220, 100, 0.85);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 2px 6px;
+}
+
+.hud-tl {
+    top: 10px;
+    left: 10px;
+}
+
+.hud-tr {
+    top: 10px;
+    right: 10px;
+}
+
+.hud-bl {
+    bottom: 10px;
+    left: 10px;
+}
+
+.hud-br {
+    bottom: 10px;
+    right: 10px;
+}
+
+.video-stream {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Alert overlay on video */
+.video-alert-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(192, 57, 43, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    display: none;
+    animation: flash-alert 0.4s ease-in-out;
+}
+
+.video-alert-overlay.show {
+    display: flex;
+}
+
+@keyframes flash-alert {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.alert-badge {
+    text-align: center;
+    border: 4px solid #fff;
+    padding: 20px 40px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.alert-badge h2 {
+    font-family: var(--font-sketch);
+    font-size: 2.5rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+.alert-badge p {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+/* ── BOTTOM METRICS BAR ──────────────────────────────────── */
+.metrics-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.metric-card {
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.metric-card .m-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--pencil);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.metric-card .m-value {
+    font-family: var(--font-sketch);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+    line-height: 1;
+}
+
+.metric-card .m-sub {
+    font-size: 0.6rem;
+    color: var(--ink-very-faint);
+    font-family: var(--font-mono);
+}
+
+/* ── RIGHT COLUMN ────────────────────────────────────────── */
+.right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink) var(--paper);
+}
+
+.right-col::-webkit-scrollbar {
+    width: 4px;
+}
+
+.right-col::-webkit-scrollbar-thumb {
+    background: var(--ink);
+}
+
+.right-col::-webkit-scrollbar-track {
+    background: var(--paper);
+}
+
+/* ── PANEL SHARED STYLES ─────────────────────────────────── */
+.panel-title {
+    font-family: var(--font-sketch);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1.5px solid var(--paper-line);
+    padding-bottom: 4px;
+}
+
+.panel-title .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── RISK PANEL ──────────────────────────────────────────── */
+.risk-panel {
+    padding: 10px;
+}
+
+.risk-score-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.risk-number {
+    font-family: var(--font-sketch);
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+    transition: color 0.4s;
+}
+
+.risk-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--pencil);
+    flex: 1;
+}
+
+.risk-label strong {
+    display: block;
+    font-size: 1rem;
+    letter-spacing: 0;
+    color: var(--ink);
+}
+
+/* Hand-drawn-looking progress bar */
+.sketch-progress {
+    width: 100%;
+    height: 18px;
+    background: var(--paper-dark);
+    border: 2px solid var(--ink);
+    border-radius: 1px 4px 2px 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.sketch-progress-fill {
+    height: 100%;
+    transition: width 0.5s cubic-bezier(.22, .61, .36, 1), background 0.4s;
+    background: var(--focused);
+    /* Pencil-stroke diagonal texture */
+    background-image: repeating-linear-gradient(-45deg,
+            transparent 0px,
+            transparent 4px,
+            rgba(0, 0, 0, 0.1) 4px,
+            rgba(0, 0, 0, 0.1) 5px);
+}
+
+/* ── STATUS GRID (per SDD 7.1 color coding) ──────────────── */
+.status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 10px;
+}
+
+.status-item {
+    padding: 7px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: all 0.2s;
+}
+
+.status-item .si-label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--pencil);
+}
+
+.status-item .si-value {
+    font-family: var(--font-sketch);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/* SDD-specified state colors */
+.si-focused {
+    background: var(--focused-bg);
+    border-color: var(--focused) !important;
+}
+
+.si-focused .si-value {
+    color: var(--focused);
+}
+
+.si-warn {
+    background: var(--warn-bg);
+    border-color: var(--warn) !important;
+}
+
+.si-warn .si-value {
+    color: var(--warn);
+}
+
+.si-alert {
+    background: var(--alert-bg);
+    border-color: var(--alert) !important;
+}
+
+.si-alert .si-value {
+    color: var(--alert);
+}
+
+.si-danger {
+    background: var(--danger-bg);
+    border-color: var(--danger) !important;
+}
+
+.si-danger .si-value {
+    color: var(--danger);
+}
+
+/* ── HEAD POSE PANEL ─────────────────────────────────────── */
+.head-pose-panel {
+    padding: 10px;
+}
+
+.pose-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--paper-line);
+}
+
+.pose-row:last-child {
+    border-bottom: none;
+}
+
+.pose-row .pr-label {
+    color: var(--pencil);
+}
+
+.pose-row .pr-val {
+    font-family: var(--font-sketch);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.pose-bar-wrap {
+    flex: 1;
+    margin: 0 8px;
+    height: 5px;
+    background: var(--paper-dark);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.pose-bar-fill {
+    height: 100%;
+    background: var(--ink);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+/* ── ANOMALY CHART ───────────────────────────────────────── */
+.chart-panel {
+    padding: 10px;
+    flex-grow: 1;
+    min-height: 120px;
+}
+
+.chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 100px;
+}
+
+/* ── ALERT LOG ───────────────────────────────────────────── */
+.alert-panel {
+    padding: 10px;
+}
+
+.alert-log {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.alert-log::-webkit-scrollbar {
+    width: 3px;
+}
+
+.alert-log::-webkit-scrollbar-thumb {
+    background: var(--ink);
+}
+
+.alert-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 5px 7px;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    border-left: 3px solid transparent;
+}
+
+.alert-entry.ae-danger {
+    background: var(--danger-bg);
+    border-left-color: var(--danger);
+}
+
+.alert-entry.ae-warn {
+    background: var(--warn-bg);
+    border-left-color: var(--warn);
+}
+
+.alert-entry.ae-info {
+    background: var(--focused-bg);
+    border-left-color: var(--focused);
+}
+
+.ae-time {
+    color: var(--ink-very-faint);
+    flex-shrink: 0;
+    font-size: 0.6rem;
+    font-family: var(--font-mono);
+}
+
+.ae-msg {
+    color: var(--ink);
+}
+
+.no-alerts {
+    text-align: center;
+    padding: 20px;
+    color: var(--ink-very-faint);
+    font-family: var(--font-sketch);
+    font-size: 0.9rem;
+}
+
+/* ── CONFIG PANEL ────────────────────────────────────────── */
+.config-panel {
+    padding: 10px;
+}
+
+.config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 0;
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    border-bottom: 1px dashed var(--paper-line);
+}
+
+.config-row:last-child {
+    border-bottom: none;
+}
+
+.config-row label {
+    color: var(--pencil);
+    flex: 1;
+}
+
+.sketch-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px;
+    height: 4px;
+    background: var(--paper-dark);
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    outline: none;
+}
+
+.sketch-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+    border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--ink);
+}
+
+.sketch-select {
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    padding: 2px 4px;
+    border-radius: 2px;
+    color: var(--ink);
+    cursor: pointer;
+}
+
+/* ── ICON COLORS ─────────────────────────────────────────── */
+.ico-green {
+    color: var(--focused);
+}
+
+.ico-yellow {
+    color: var(--warn);
+}
+
+.ico-orange {
+    color: var(--alert);
+}
+
+.ico-red {
+    color: var(--danger);
+}
+
+.ico-ink {
+    color: var(--ink);
+}
+
+/* ── ANIMATIONS ──────────────────────────────────────────── */
+@keyframes pen-draw {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-entry {
+    animation: pen-draw 0.2s ease;
+}
+
+/* ── FPS COUNTER ─────────────────────────────────────────── */
+#fps-val {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body {
+        overflow: auto;
+    }
+}

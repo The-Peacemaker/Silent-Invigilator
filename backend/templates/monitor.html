@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Monitoring — Silent Invigilator</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            overflow: hidden;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══ TOP BAR ═══ -->
+    <div class="monitor-topbar">
+        <div class="brand-mini">
+            <div class="brand-icon-sm"
+                style="display:inline-flex; width:28px; height:28px; background:transparent; border-radius:4px; box-shadow: 0 0 10px rgba(0,212,255,0.5);">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="SI Logo"
+                    style="width:100%; height:100%; object-fit:cover; border-radius:4px;">
+            </div>
+            Silent Invigilator
+            <span style="color:var(--text-muted); font-family:var(--font-mono); font-size:0.7rem; margin-left:8px;">LIVE
+                MONITORING</span>
+        </div>
+        <div class="monitor-topbar-right">
+            <a href="/dashboard" class="btn btn-ghost btn-sm">← Back to Dashboard</a>
+            <span class="topbar-pill" id="clock-display">00:00:00</span>
+            <span class="topbar-pill" id="fps-display">FPS: —</span>
+            <span class="topbar-pill live-pill" id="conn-pill">● LIVE</span>
+        </div>
+    </div>
+
+    <!-- ═══ MONITORING LAYOUT ═══ -->
+    <div class="monitor-layout">
+
+        <!-- ── LEFT: VIDEO + METRICS ── -->
+        <div class="monitor-left">
+            <div class="monitor-video glass-panel" style="padding:0; border-radius: var(--radius-md); overflow:hidden;">
+                <!-- HUD Overlay -->
+                <div class="monitor-hud">
+                    <div class="hud-tag hud-tl">CAM_01 // EXAM HALL</div>
+                    <div class="hud-tag hud-tr hud-live"><span class="live-dot"></span> REC</div>
+                    <div class="hud-tag hud-bl" id="hud-bl">YOLOv8 + MediaPipe</div>
+                    <div class="hud-tag hud-br" style="font-size:0.55rem;">GROUP 10 — CSE-B</div>
+                </div>
+
+                <!-- Video Stream -->
+                <img id="video-stream" src="/video_feed" alt="Camera feed loading..."
+                    style="width:100%;height:100%;object-fit:contain;display:block;background:#000;">
+
+                <!-- Alert Overlay -->
+                <div id="video-alert-overlay" class="video-alert-overlay-dark">
+                    <div class="alert-overlay-content">
+                        <h2>⚠ VIOLATION DETECTED</h2>
+                        <p id="overlay-reason">Malpractice Detected</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Metrics -->
+            <div class="monitor-metrics">
+                <div class="monitor-metric-card glass-panel">
+                    <div class="metric-label">Head Yaw</div>
+                    <div class="metric-value" id="met-yaw">0°</div>
+                    <div class="metric-sub">Left / Right</div>
+                </div>
+                <div class="monitor-metric-card glass-panel">
+                    <div class="metric-label">Head Pitch</div>
+                    <div class="metric-value" id="met-pitch">0°</div>
+                    <div class="metric-sub">Up / Down</div>
+                </div>
+                <div class="monitor-metric-card glass-panel">
+                    <div class="metric-label">Gaze Dir.</div>
+                    <div class="metric-value" id="met-gaze">—</div>
+                    <div class="metric-sub">Eye Tracking</div>
+                </div>
+                <div class="monitor-metric-card glass-panel">
+                    <div class="metric-label">Persons</div>
+                    <div class="metric-value" id="met-persons">0</div>
+                    <div class="metric-sub">In Frame</div>
+                </div>
+                <div class="monitor-metric-card glass-panel">
+                    <div class="metric-label">Alerts</div>
+                    <div class="metric-value" id="met-alerts">0</div>
+                    <div class="metric-sub">This Session</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── RIGHT: PANELS ── -->
+        <div class="monitor-right">
+            <!-- Risk Panel -->
+            <div class="risk-panel-dark glass-panel">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--status-danger);"></span>
+                    <span style="font-family:var(--font-display);font-weight:600;font-size:0.9rem;">Risk Level</span>
+                </div>
+                <div class="risk-score-display">
+                    <div class="risk-big-number" id="risk-number">00</div>
+                    <div class="risk-info">
+                        <span class="risk-sub">ANOMALY SCORE</span>
+                        <div class="risk-level" id="risk-level-text">NORMAL</div>
+                    </div>
+                </div>
+                <div class="risk-bar-track">
+                    <div class="risk-bar-fill" id="risk-bar" style="width:0%;"></div>
+                </div>
+                <div class="risk-bar-labels">
+                    <span>0 — Focused</span>
+                    <span>50 — Suspicious</span>
+                    <span>100 — Critical</span>
+                </div>
+            </div>
+
+            <!-- Detection Status -->
+            <div class="glass-panel" style="padding:16px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--status-safe);"></span>
+                    <span style="font-family:var(--font-display);font-weight:600;font-size:0.9rem;">Detection
+                        Status</span>
+                </div>
+                <div class="status-grid-dark">
+                    <div class="status-indicator" id="si-face">
+                        <div class="si-label"><span style='font-weight: 700;'>[O]</span> Face Scan</div>
+                        <div class="si-value" id="si-face-val">Scanning…</div>
+                    </div>
+                    <div class="status-indicator" id="si-pose">
+                        <div class="si-label"><span style='font-weight: 700;'>~</span> Head Pose</div>
+                        <div class="si-value" id="si-pose-val">Center</div>
+                    </div>
+                    <div class="status-indicator" id="si-gaze">
+                        <div class="si-label"><span style='font-weight: 700;'>*</span> Gaze</div>
+                        <div class="si-value" id="si-gaze-val">Focused</div>
+                    </div>
+                    <div class="status-indicator" id="si-phone">
+                        <div class="si-label"><span style='font-weight: 700;'>#</span> Object Det.</div>
+                        <div class="si-value" id="si-phone-val">None</div>
+                    </div>
+                </div>
+                <!-- Behavioral State -->
+                <div id="behavior-state-wrap"
+                    style="margin-top:12px;padding:10px;background:var(--status-safe-bg);border:1px solid rgba(16,185,129,0.3);border-radius:var(--radius-sm);">
+                    <span
+                        style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);">Behavioral
+                        State</span>
+                    <div id="behavior-state"
+                        style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--status-safe);">
+                        ✓ Focused</div>
+                </div>
+            </div>
+
+            <!-- Anomaly Chart -->
+            <div class="glass-panel" style="padding:16px;flex:1;min-height:120px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--accent-cyan);"></span>
+                    <span style="font-family:var(--font-display);font-weight:600;font-size:0.9rem;">Anomaly
+                        Timeline</span>
+                </div>
+                <div style="position:relative;width:100%;height:80px;">
+                    <canvas id="anomalyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Alert Log -->
+            <div class="glass-panel" style="padding:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="width:8px;height:8px;border-radius:50%;background:var(--status-danger);"></span>
+                        <span style="font-family:var(--font-display);font-weight:600;font-size:0.9rem;">Alert Log</span>
+                    </div>
+                    <button onclick="clearAlerts()" class="btn btn-ghost btn-sm"
+                        style="padding:2px 8px;font-size:0.65rem;">Clear</button>
+                </div>
+                <div id="alert-log"
+                    style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;">
+                    <div class="empty-state" style="padding:16px;">
+                        <p style="font-size:0.8rem;">No alerts ✓</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ═══ CLOCK ═══ */
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock-display').textContent = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        /* ═══ CHART ═══ */
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        const chartCtx = document.getElementById('anomalyChart').getContext('2d');
+        const HISTORY_LEN = 30;
+        const chartData = Array(HISTORY_LEN).fill(0);
+        const chartLabels = Array(HISTORY_LEN).fill('');
+
+        const anomalyChart = new Chart(chartCtx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Anomaly',
+                    data: chartData,
+                    borderColor: '#00d4ff',
+                    backgroundColor: 'rgba(0, 212, 255, 0.08)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 200 },
+                scales: {
+                    y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { stepSize: 25, font: { size: 9 } }, border: { dash: [3, 3] } },
+                    x: { display: false }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        /* ═══ STATE ═══ */
+        let sessionAlertCount = 0;
+        let lastAlertTs = 0;
+        const ALERT_COOLDOWN = 2500;
+        let isPolling = false;
+
+        /* ═══ HELPERS ═══ */
+        function getRiskTier(score) {
+            if (score < 30) return { label: 'LOW RISK', color: '#10b981' };
+            if (score < 70) return { label: 'SUSPICIOUS', color: '#f59e0b' };
+            return { label: 'HIGH RISK', color: '#ef4444' };
+        }
+
+        function applyStatusClass(el, level) {
+            el.classList.remove('safe', 'warn', 'danger');
+            if (level === 'ok') el.classList.add('safe');
+            if (level === 'warn') el.classList.add('warn');
+            if (level === 'danger') el.classList.add('danger');
+        }
+
+        function logAlert(msg, type = 'warn') {
+            const now = Date.now();
+            if (now - lastAlertTs < ALERT_COOLDOWN) return;
+            lastAlertTs = now;
+            sessionAlertCount++;
+            document.getElementById('met-alerts').textContent = sessionAlertCount;
+
+            const log = document.getElementById('alert-log');
+            const placeholder = log.querySelector('.empty-state');
+            if (placeholder) placeholder.remove();
+
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = `alert-item severity-${type === 'danger' ? 'critical' : type === 'warn' ? 'warning' : 'info'}`;
+            entry.style.cssText = 'padding:6px 8px;font-size:0.75rem;animation:fade-up 0.2s ease;';
+            entry.innerHTML = `<span class="alert-time" style="font-size:0.6rem;">${time}</span><div class="alert-content"><div class="alert-desc">${msg}</div></div>`;
+            log.prepend(entry);
+            while (log.children.length > 20) log.lastChild.remove();
+        }
+
+        function clearAlerts() {
+            document.getElementById('alert-log').innerHTML = '<div class="empty-state" style="padding:16px;"><p style="font-size:0.8rem;">Log cleared ✓</p></div>';
+        }
+
+        /* ═══ POLL LOOP ═══ */
+        function pollStatus() {
+            if (isPolling) return;
+            isPolling = true;
+
+            fetch('/status')
+                .then(r => r.json())
+                .then(data => { isPolling = false; updateDashboard(data); })
+                .catch(() => {
+                    isPolling = false;
+                    const pill = document.getElementById('conn-pill');
+                    pill.textContent = '● OFFLINE';
+                    pill.classList.remove('live-pill');
+                });
+        }
+
+        function updateDashboard(data) {
+            const pill = document.getElementById('conn-pill');
+            pill.textContent = '● LIVE';
+            pill.classList.add('live-pill');
+
+            const score = Math.round(data.risk_score || 0);
+            const tier = getRiskTier(score);
+
+            document.getElementById('risk-number').textContent = String(score).padStart(2, '0');
+            document.getElementById('risk-number').style.color = tier.color;
+            document.getElementById('risk-level-text').textContent = tier.label;
+            document.getElementById('risk-level-text').style.color = tier.color;
+
+            const bar = document.getElementById('risk-bar');
+            bar.style.width = `${score}%`;
+            bar.style.background = tier.color;
+
+            /* Chart */
+            anomalyChart.data.datasets[0].data.shift();
+            anomalyChart.data.datasets[0].data.push(score);
+            anomalyChart.data.datasets[0].borderColor = tier.color;
+            anomalyChart.data.datasets[0].backgroundColor = tier.color + '18';
+            anomalyChart.update('none');
+
+            /* Status Indicators */
+            const faceEl = document.getElementById('si-face');
+            const faceVal = document.getElementById('si-face-val');
+            if (data.face_detected) { faceVal.textContent = 'Detected ✓'; applyStatusClass(faceEl, 'ok'); }
+            else { faceVal.textContent = 'Not Found ✗'; applyStatusClass(faceEl, 'danger'); logAlert('⚠ No face detected', 'danger'); }
+
+            const poseEl = document.getElementById('si-pose');
+            const poseVal = document.getElementById('si-pose-val');
+            const pose = data.head_pose || 'Center';
+            poseVal.textContent = pose;
+            if (pose === 'Center') applyStatusClass(poseEl, 'ok');
+            else if (pose.includes('Up') || pose.includes('Down')) applyStatusClass(poseEl, 'warn');
+            else applyStatusClass(poseEl, 'warn');
+
+            const gazeEl = document.getElementById('si-gaze');
+            const gazeVal = document.getElementById('si-gaze-val');
+            const gaze = data.gaze || 'Center';
+            gazeVal.textContent = gaze === 'Center' ? 'Focused ✓' : `Gaze: ${gaze}`;
+            applyStatusClass(gazeEl, gaze === 'Center' ? 'ok' : 'warn');
+
+            const phoneEl = document.getElementById('si-phone');
+            const phoneVal = document.getElementById('si-phone-val');
+            if (data.phone_detected) { phoneVal.textContent = 'PHONE DETECTED'; applyStatusClass(phoneEl, 'danger'); logAlert('🚨 Phone detected!', 'danger'); }
+            else { phoneVal.textContent = 'None ✓'; applyStatusClass(phoneEl, 'ok'); }
+
+            /* Behavioral State */
+            const stateEl = document.getElementById('behavior-state');
+            const stateWrap = document.getElementById('behavior-state-wrap');
+            const detections = data.detections || [];
+            let stateText = '✓ Focused', stateColor = 'var(--status-safe)', stateBg = 'var(--status-safe-bg)', stateBorder = 'rgba(16,185,129,0.3)';
+
+            if (score >= 70 || data.phone_detected) {
+                stateText = '⚠ SUSPICIOUS'; stateColor = 'var(--status-danger)'; stateBg = 'var(--status-danger-bg)'; stateBorder = 'rgba(239,68,68,0.3)';
+            } else if (pose !== 'Center' || gaze !== 'Center') {
+                stateText = '↔ Looking Away'; stateColor = 'var(--status-warn)'; stateBg = 'var(--status-warn-bg)'; stateBorder = 'rgba(245,158,11,0.3)';
+            }
+
+            stateEl.textContent = stateText;
+            stateEl.style.color = stateColor;
+            stateWrap.style.background = stateBg;
+            stateWrap.style.borderColor = stateBorder;
+
+            /* Metrics */
+            document.getElementById('met-gaze').textContent = gaze;
+            const yaw = typeof data.yaw === 'number' ? data.yaw : 0;
+            const pitch = typeof data.pitch === 'number' ? data.pitch : 0;
+            document.getElementById('met-yaw').textContent = `${yaw.toFixed(1)}°`;
+            document.getElementById('met-pitch').textContent = `${pitch.toFixed(1)}°`;
+
+            const personMatch = detections.find(d => d.toLowerCase().includes('student'));
+            if (personMatch) {
+                const numMatch = personMatch.match(/\d+/);
+                if (numMatch) document.getElementById('met-persons').textContent = numMatch[0];
+            }
+
+            /* Video Alert Overlay */
+            const overlay = document.getElementById('video-alert-overlay');
+            if (score >= 70) {
+                overlay.classList.add('show');
+                const reasons = detections.slice(0, 2).join(' · ') || 'High Risk Behavior';
+                document.getElementById('overlay-reason').textContent = reasons;
+                logAlert(`High risk — ${reasons}`, 'danger');
+            } else {
+                overlay.classList.remove('show');
+            }
+
+            /* Detection Alerts */
+            detections.forEach(det => {
+                const dl = det.toLowerCase();
+                if (dl.includes('talking')) logAlert('🗣 Talking detected', 'warn');
+                if (dl.includes('proximity')) logAlert('👥 Proximity alert', 'warn');
+                if (dl.includes('looking down')) logAlert('👇 Looking down', 'warn');
+            });
+        }
+
+        /* FPS */
+        let lastPoll = Date.now();
+        function tickFPS() {
+            const now = Date.now();
+            const fps = Math.min(Math.round(1000 / (now - lastPoll)), 30);
+            lastPoll = now;
+            document.getElementById('fps-display').textContent = `FPS: ${fps}`;
+            const hud = document.getElementById('hud-bl');
+            if (hud) hud.textContent = `YOLOv8 + MediaPipe · ${fps} FPS`;
+        }
+
+        setInterval(() => { pollStatus(); tickFPS(); }, 1000);
+        pollStatus();
+    </script>
+</body>
+
+</html>

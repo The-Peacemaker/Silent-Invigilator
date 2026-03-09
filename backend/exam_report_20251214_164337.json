@@ -1,0 +1,1588 @@
+{
+  "exam_session": {
+    "start_time": "2025-12-14 16:42:08",
+    "duration_seconds": 88.37,
+    "duration_formatted": "1m 28s"
+  },
+  "statistics": {
+    "total_frames_analyzed": 668,
+    "suspicious_frames": 586,
+    "suspicious_percentage": 87.72,
+    "total_alerts": 80,
+    "average_anomaly_score": 48.96,
+    "max_anomaly_score": 105,
+    "min_anomaly_score": 0
+  },
+  "behavior_analysis": {
+    "avg_head_yaw": -135.7,
+    "avg_head_pitch": -198.52,
+    "avg_gaze_deviation": 0.005,
+    "looking_away_frames": 0,
+    "phone_detected_frames": 0,
+    "multiple_faces_detected": 0
+  },
+  "alerts": [
+    {
+      "timestamp": "2025-12-14 16:42:19.478",
+      "frame_number": 80,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (591.3\u00b0)",
+        "Looking UP (358.1\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.85)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 1,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:19.605",
+      "frame_number": 81,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (485.7\u00b0)",
+        "Looking UP (237.4\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 2,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:21.695",
+      "frame_number": 98,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (644.4\u00b0)",
+        "Looking UP (348.8\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.76)"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 4,
+        "phone_present": 1,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:21.803",
+      "frame_number": 99,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (376.7\u00b0)",
+        "Looking DOWN (135.8\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.87)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 2,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:21.922",
+      "frame_number": 100,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (746.6\u00b0)",
+        "Looking UP (354.5\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.90)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 3,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.037",
+      "frame_number": 101,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (535.3\u00b0)",
+        "Looking DOWN (122.5\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.87)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 4,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.149",
+      "frame_number": 102,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (734.7\u00b0)",
+        "Looking UP (297.6\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.89)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 5,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.251",
+      "frame_number": 103,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (466.3\u00b0)",
+        "Looking DOWN (146.6\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.90)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 6,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.390",
+      "frame_number": 104,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (761.0\u00b0)",
+        "Looking UP (368.0\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.90)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 7,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.501",
+      "frame_number": 105,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (505.4\u00b0)",
+        "Looking DOWN (122.3\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.90)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 8,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.608",
+      "frame_number": 106,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (411.3\u00b0)",
+        "Looking DOWN (150.3\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.90)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 2,
+        "looking_down": 2,
+        "looking_up": 0,
+        "phone_present": 9,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.728",
+      "frame_number": 107,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (754.1\u00b0)",
+        "Looking UP (307.1\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.90)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 10,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.832",
+      "frame_number": 108,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (731.5\u00b0)",
+        "Looking UP (358.9\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 11,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:22.952",
+      "frame_number": 109,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (832.4\u00b0)",
+        "Looking UP (379.1\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.90)"
+      ],
+      "flags": {
+        "looking_left": 3,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 3,
+        "phone_present": 12,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.060",
+      "frame_number": 110,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (580.3\u00b0)",
+        "Looking DOWN (133.9\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 13,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.179",
+      "frame_number": 111,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (578.3\u00b0)",
+        "Looking DOWN (133.1\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 2,
+        "looking_down": 2,
+        "looking_up": 0,
+        "phone_present": 14,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.291",
+      "frame_number": 112,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (784.8\u00b0)",
+        "Looking UP (345.5\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.92)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 15,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.405",
+      "frame_number": 113,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (830.7\u00b0)",
+        "Looking UP (398.0\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 16,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.526",
+      "frame_number": 114,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (535.5\u00b0)",
+        "Looking DOWN (184.4\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 17,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.648",
+      "frame_number": 115,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (795.0\u00b0)",
+        "Looking UP (336.7\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 18,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.766",
+      "frame_number": 116,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (836.3\u00b0)",
+        "Looking UP (424.7\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.94)"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 19,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.869",
+      "frame_number": 117,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (531.4\u00b0)",
+        "Looking DOWN (171.0\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.93)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 20,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:23.986",
+      "frame_number": 118,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (889.0\u00b0)",
+        "Looking UP (318.6\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.93)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 21,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:24.101",
+      "frame_number": 119,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (633.9\u00b0)",
+        "Looking DOWN (172.8\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.84)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 22,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:24.229",
+      "frame_number": 120,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (793.1\u00b0)",
+        "Looking UP (397.9\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.82)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 23,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:24.349",
+      "frame_number": 121,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (850.5\u00b0)",
+        "Looking UP (398.3\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 24,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:25.619",
+      "frame_number": 132,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (776.0\u00b0)",
+        "Looking UP (313.9\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.85)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 15,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:25.743",
+      "frame_number": 133,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (561.3\u00b0)",
+        "Looking DOWN (116.2\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.71)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 16,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:25.861",
+      "frame_number": 134,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (495.7\u00b0)",
+        "Looking DOWN (194.5\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 2,
+        "looking_down": 2,
+        "looking_up": 0,
+        "phone_present": 17,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:25.978",
+      "frame_number": 135,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (585.5\u00b0)",
+        "Looking DOWN (229.2\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 3,
+        "looking_down": 3,
+        "looking_up": 0,
+        "phone_present": 18,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:26.092",
+      "frame_number": 136,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (535.0\u00b0)",
+        "Looking DOWN (212.8\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.88)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 4,
+        "looking_down": 4,
+        "looking_up": 0,
+        "phone_present": 19,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:26.199",
+      "frame_number": 137,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (783.4\u00b0)",
+        "Looking UP (387.9\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.91)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 20,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:26.317",
+      "frame_number": 138,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (533.1\u00b0)",
+        "Looking DOWN (89.2\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.88)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 21,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:26.446",
+      "frame_number": 139,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (496.3\u00b0)",
+        "Looking DOWN (171.5\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.79)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 2,
+        "looking_down": 2,
+        "looking_up": 0,
+        "phone_present": 22,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:26.553",
+      "frame_number": 140,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (626.0\u00b0)",
+        "Looking DOWN (229.3\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.85)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 3,
+        "looking_down": 3,
+        "looking_up": 0,
+        "phone_present": 23,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:26.660",
+      "frame_number": 141,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (607.7\u00b0)",
+        "Looking DOWN (64.3\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.86)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 4,
+        "looking_down": 4,
+        "looking_up": 0,
+        "phone_present": 24,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:26.775",
+      "frame_number": 142,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (566.9\u00b0)",
+        "Looking DOWN (64.7\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.73)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 5,
+        "looking_down": 5,
+        "looking_up": 0,
+        "phone_present": 25,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:26.890",
+      "frame_number": 143,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (531.4\u00b0)",
+        "Looking DOWN (161.8\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.51)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 6,
+        "looking_down": 6,
+        "looking_up": 0,
+        "phone_present": 26,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:27.000",
+      "frame_number": 144,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (847.1\u00b0)",
+        "Looking UP (362.9\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.79)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 27,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:27.129",
+      "frame_number": 145,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (857.4\u00b0)",
+        "Looking UP (397.6\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.84)"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 28,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:27.232",
+      "frame_number": 146,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (603.2\u00b0)",
+        "Looking DOWN (139.8\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.85)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 29,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:27.344",
+      "frame_number": 147,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (633.3\u00b0)",
+        "Looking DOWN (190.3\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.89)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 2,
+        "looking_down": 2,
+        "looking_up": 0,
+        "phone_present": 30,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:27.460",
+      "frame_number": 148,
+      "score": 95,
+      "detections": [
+        "Looking RIGHT (528.2\u00b0)",
+        "Looking DOWN (189.5\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.89)"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 3,
+        "looking_down": 3,
+        "looking_up": 0,
+        "phone_present": 31,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:27.589",
+      "frame_number": 149,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (823.5\u00b0)",
+        "Looking UP (393.5\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.76)"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 32,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:27.717",
+      "frame_number": 150,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (891.9\u00b0)",
+        "Looking UP (422.7\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.85)"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 33,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:27.844",
+      "frame_number": 151,
+      "score": 95,
+      "detections": [
+        "Looking LEFT (870.4\u00b0)",
+        "Looking UP (399.5\u00b0)",
+        "\ud83d\udea8 Mobile Phone detected (0.82)"
+      ],
+      "flags": {
+        "looking_left": 3,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 3,
+        "phone_present": 34,
+        "multiple_persons": 0,
+        "hand_near_face": 0
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:42:50.370",
+      "frame_number": 321,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (287.3\u00b0)",
+        "Looking DOWN (1993.1\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 59
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:03.332",
+      "frame_number": 416,
+      "score": 75,
+      "detections": [
+        "Looking RIGHT (1072.9\u00b0)",
+        "Looking DOWN (695.1\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:03.455",
+      "frame_number": 417,
+      "score": 75,
+      "detections": [
+        "Looking LEFT (1532.5\u00b0)",
+        "Looking UP (1126.8\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:03.570",
+      "frame_number": 418,
+      "score": 75,
+      "detections": [
+        "Looking LEFT (1482.1\u00b0)",
+        "Looking UP (987.9\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:03.683",
+      "frame_number": 419,
+      "score": 75,
+      "detections": [
+        "Looking RIGHT (1182.5\u00b0)",
+        "Looking DOWN (541.7\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:03.790",
+      "frame_number": 420,
+      "score": 75,
+      "detections": [
+        "Looking LEFT (1605.5\u00b0)",
+        "Looking UP (958.6\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:03.924",
+      "frame_number": 421,
+      "score": 75,
+      "detections": [
+        "Looking RIGHT (1304.3\u00b0)",
+        "Looking DOWN (462.9\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:04.059",
+      "frame_number": 422,
+      "score": 75,
+      "detections": [
+        "Looking LEFT (1573.2\u00b0)",
+        "Looking UP (895.7\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:04.180",
+      "frame_number": 423,
+      "score": 75,
+      "detections": [
+        "Looking LEFT (1567.6\u00b0)",
+        "Looking UP (914.8\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:04.333",
+      "frame_number": 424,
+      "score": 75,
+      "detections": [
+        "Looking LEFT (1580.8\u00b0)",
+        "Looking UP (867.0\u00b0)",
+        "\ud83d\udd34 SUSTAINED INATTENTION"
+      ],
+      "flags": {
+        "looking_left": 3,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 3,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 90
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:05.240",
+      "frame_number": 431,
+      "score": 65,
+      "detections": [
+        "Looking RIGHT (978.1\u00b0)",
+        "Looking DOWN (729.2\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 92
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:05.370",
+      "frame_number": 432,
+      "score": 65,
+      "detections": [
+        "Looking RIGHT (875.3\u00b0)",
+        "Looking DOWN (883.9\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 2,
+        "looking_down": 2,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 94
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:05.494",
+      "frame_number": 433,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1139.0\u00b0)",
+        "Looking UP (1476.4\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 96
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:05.616",
+      "frame_number": 434,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1026.6\u00b0)",
+        "Looking UP (1413.9\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 98
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:05.738",
+      "frame_number": 435,
+      "score": 65,
+      "detections": [
+        "Looking RIGHT (680.3\u00b0)",
+        "Looking DOWN (886.4\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 100
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:05.860",
+      "frame_number": 436,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1161.4\u00b0)",
+        "Looking UP (1305.0\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 102
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:05.981",
+      "frame_number": 437,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1397.1\u00b0)",
+        "Looking UP (1264.1\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 104
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:06.103",
+      "frame_number": 438,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1321.9\u00b0)",
+        "Looking UP (1107.2\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 3,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 3,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 106
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:06.232",
+      "frame_number": 439,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1401.2\u00b0)",
+        "Looking UP (1243.3\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 4,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 4,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 108
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:06.360",
+      "frame_number": 440,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1542.1\u00b0)",
+        "Looking UP (1055.3\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 5,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 5,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 110
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:06.472",
+      "frame_number": 441,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1620.8\u00b0)",
+        "Looking UP (982.9\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 6,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 6,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 112
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:06.585",
+      "frame_number": 442,
+      "score": 65,
+      "detections": [
+        "Looking RIGHT (1112.1\u00b0)",
+        "Looking DOWN (530.8\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 114
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:06.705",
+      "frame_number": 443,
+      "score": 65,
+      "detections": [
+        "Looking RIGHT (1261.1\u00b0)",
+        "Looking DOWN (505.6\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 2,
+        "looking_down": 2,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 116
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:06.830",
+      "frame_number": 444,
+      "score": 65,
+      "detections": [
+        "Looking RIGHT (1302.6\u00b0)",
+        "Looking DOWN (363.5\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 3,
+        "looking_down": 3,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 118
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:06.955",
+      "frame_number": 445,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1797.8\u00b0)",
+        "Looking UP (837.8\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 120
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:07.075",
+      "frame_number": 446,
+      "score": 65,
+      "detections": [
+        "Looking RIGHT (1317.3\u00b0)",
+        "Looking DOWN (555.5\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 122
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:07.195",
+      "frame_number": 447,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1806.2\u00b0)",
+        "Looking UP (844.2\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 124
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:07.323",
+      "frame_number": 448,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1704.2\u00b0)",
+        "Looking UP (761.6\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 126
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:07.574",
+      "frame_number": 450,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1642.9\u00b0)",
+        "Looking UP (790.0\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 129
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:08.411",
+      "frame_number": 456,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1527.1\u00b0)",
+        "Looking UP (1289.4\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 135
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:08.535",
+      "frame_number": 457,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1444.6\u00b0)",
+        "Looking UP (1285.7\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 2,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 2,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 137
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:08.802",
+      "frame_number": 459,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1206.3\u00b0)",
+        "Looking UP (1076.7\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 140
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:08.936",
+      "frame_number": 460,
+      "score": 105,
+      "detections": [
+        "\u26a0 2 persons detected",
+        "Looking RIGHT (1246.9\u00b0)",
+        "Looking DOWN (272.7\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 0,
+        "looking_right": 1,
+        "looking_down": 1,
+        "looking_up": 0,
+        "phone_present": 0,
+        "multiple_persons": 1,
+        "hand_near_face": 142
+      }
+    },
+    {
+      "timestamp": "2025-12-14 16:43:09.085",
+      "frame_number": 461,
+      "score": 65,
+      "detections": [
+        "Looking LEFT (1271.0\u00b0)",
+        "Looking UP (1059.2\u00b0)",
+        "Hand near face region",
+        "Hand near face region"
+      ],
+      "flags": {
+        "looking_left": 1,
+        "looking_right": 0,
+        "looking_down": 0,
+        "looking_up": 1,
+        "phone_present": 0,
+        "multiple_persons": 0,
+        "hand_near_face": 144
+      }
+    }
+  ],
+  "flags_summary": {
+    "max_looking_left_streak": 0,
+    "max_looking_right_streak": 0,
+    "max_looking_down_streak": 0,
+    "max_looking_up_streak": 3,
+    "max_phone_present_streak": 0,
+    "max_multiple_persons_streak": 0
+  },
+  "verdict": {
+    "status": "HIGH RISK",
+    "color": "RED",
+    "avg_anomaly_score": 48.96,
+    "total_alerts": 80,
+    "suspicious_frame_ratio": 0.877,
+    "recommendation": "Manual review strongly recommended. Multiple malpractice indicators detected."
+  }
+}

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard — Silent Invigilator</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard cyber-dashboard">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar glass-panel"
+            style="border-right: 1px solid rgba(0, 212, 255, 0.2); box-shadow: 4px 0 24px rgba(0,0,0,0.4);">
+            <div class="sidebar-brand">
+                <div class="brand-icon" style="background: transparent; box-shadow: 0 0 20px rgba(0,212,255,0.5);">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="SI Logo"
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                </div>
+                <div>
+                    <h2 style="text-shadow: 0 0 10px rgba(255,255,255,0.2);">Silent Invigilator</h2>
+                    <span class="role-badge"
+                        style="background: rgba(124, 58, 237, 0.2); border: 1px solid var(--accent-purple); color: #d8b4fe; text-shadow: 0 0 5px rgba(124, 58, 237, 0.8);">Teacher
+                        [Lvl 2]</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label" style="color: var(--accent-cyan-dim);">Main</div>
+                <a href="/teacher" class="sidebar-link active"
+                    style="background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-cyan);">
+                    <span class="link-icon" style="font-weight: 700; color: var(--accent-cyan);">#</span> Overview
+                </a>
+                <a href="#alerts-section" class="sidebar-link hover-glow" onclick="scrollToSection('alerts-section')">
+                    <span class="link-icon" style="font-weight: 700;">!</span> Alert Logs
+                </a>
+                <a href="#stats-section" class="sidebar-link hover-glow" onclick="scrollToSection('stats-section')">
+                    <span class="link-icon" style="font-weight: 700;">@</span> Statistics
+                </a>
+                <div class="nav-section-label" style="color: var(--accent-cyan-dim); margin-top: 15px;">Monitoring</div>
+                <a href="/monitor" class="sidebar-link monitor-link" style="position: relative; overflow: hidden;">
+                    <span class="link-icon" style="font-weight: 700; color: var(--status-safe);">▶</span> Live Camera
+                    Feed
+                    <span class="live-dot"
+                        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; background: var(--status-danger); border-radius: 50%; animation: pulse-glow 2s infinite;"></span>
+                </a>
+                <div class="nav-section-label" style="color: var(--accent-cyan-dim); margin-top: 15px;">Account</div>
+                <a href="/" class="sidebar-link hover-glow">
+                    <span class="link-icon" style="font-weight: 700;">⌂</span> Homepage
+                </a>
+                <a href="/logout" class="sidebar-link hover-glow" style="color: var(--status-danger);">
+                    <span class="link-icon" style="font-weight: 700;">✕</span> Sign Out
+                </a>
+            </nav>
+            <div class="sidebar-footer" style="border-top: 1px solid rgba(255,255,255,0.05);">
+                <div class="sidebar-user">
+                    <div class="user-avatar" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">{{
+                        session.get('full_name', 'T')[0] }}</div>
+                    <div class="user-info">
+                        <div class="user-name" style="font-weight: 600;">{{ session.get('full_name', 'Teacher') }}</div>
+                        <div class="user-role-text"
+                            style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">ID: {{
+                            session.get('user_id', 'T-001') }}</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="dash-main">
+            <!-- Animated cyber background grid -->
+            <div class="cyber-grid" style="opacity: 0.3; pointer-events: none;"></div>
+
+            <div class="dash-header" style="position: relative; z-index: 1;">
+                <h1
+                    style="text-shadow: 0 0 15px rgba(255,255,255,0.1); letter-spacing: 1px; font-family: var(--font-display); display: flex; align-items: center; gap: 10px;">
+                    <button class="mobile-nav-toggle"
+                        onclick="document.querySelector('.sidebar').classList.toggle('show-sidebar')"
+                        style="margin-right: 10px;">☰</button>
+                    Command Center <span
+                        style="font-size: 1rem; color: var(--text-muted); font-weight: 400; letter-spacing: 2px;">//
+                        TEACHER</span>
+                </h1>
+                <div class="header-meta">
+                    <a href="/monitor" class="btn btn-primary btn-glow"
+                        style="box-shadow: 0 0 20px rgba(0,212,255,0.5); font-family: var(--font-mono); letter-spacing: 1px; padding: 10px 20px; border: 1px solid var(--accent-cyan); display: inline-flex; align-items: center; gap: 8px;">
+                        <span
+                            style="display: block; width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff; animation: pulse-glow 1.5s infinite;"></span>
+                        INITIALIZE UPLINK
+                    </a>
+                    <span id="current-time" class="badge badge-info"
+                        style="font-size:0.75rem; font-family: var(--font-mono); border: 1px solid rgba(0,212,255,0.3);"></span>
+                </div>
+            </div>
+
+            <!-- ── STATS CARDS ── -->
+            <div class="stats-grid" style="position: relative; z-index: 1;">
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon red"
+                        style="color: var(--status-danger); font-weight: bold; text-shadow: 0 0 10px rgba(239,68,68,0.5);">
+                        !</div>
+                    <div class="stat-number" id="stat-total" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Total Alerts</div>
+                </div>
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon yellow"
+                        style="color: var(--status-warn); font-weight: bold; text-shadow: 0 0 10px rgba(245,158,11,0.5);">
+                        ⚠</div>
+                    <div class="stat-number" id="stat-critical" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Critical Alerts</div>
+                </div>
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon cyan"
+                        style="color: var(--accent-cyan); font-weight: bold; text-shadow: 0 0 10px rgba(0,212,255,0.5);">
+                        i</div>
+                    <div class="stat-number" id="stat-warnings" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Warnings</div>
+                </div>
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon green"
+                        style="color: #10b981; font-weight: bold; text-shadow: 0 0 10px rgba(16,185,129,0.5);">^</div>
+                    <div class="stat-number" id="stat-detection-rate" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Avg Risk Score</div>
+                </div>
+            </div>
+
+            <!-- ── CHARTS ── -->
+            <div class="charts-grid" id="stats-section">
+                <div class="chart-container glass-panel"
+                    style="border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                    <div class="chart-header"
+                        style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+                        <span class="chart-title"
+                            style="font-family: var(--font-mono); text-transform: uppercase; font-size: 0.8rem; color: var(--accent-cyan);">Detection
+                            Distribution</span>
+                    </div>
+                    <div class="chart-canvas-wrap" style="height:220px; margin-top: 15px;">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container glass-panel"
+                    style="border: 1px solid rgba(0,212,255,0.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                    <div class="chart-header"
+                        style="border-bottom: 1px solid rgba(0,212,255,0.1); padding-bottom: 15px;">
+                        <span class="chart-title"
+                            style="font-family: var(--font-mono); text-transform: uppercase; font-size: 0.8rem; color: var(--accent-cyan);">Alert
+                            Timeline</span>
+                    </div>
+                    <div class="chart-canvas-wrap" style="height:220px; margin-top: 15px;">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ALERT LOGS ── -->
+            <div class="data-table-wrap glass-panel" id="alerts-section"
+                style="position: relative; z-index: 1; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="table-header"
+                    style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+                    <h3 style="font-family: var(--font-display); letter-spacing: 1px;"><span
+                            style="color: var(--accent-cyan);">//</span> Incident Logs</h3>
+                    <div>
+                        <form action="/clear_logs" method="POST" style="display:inline;"
+                            onsubmit="return confirm('Clear all logs? This action requires Level 2 clearance.');">
+                            <button type="submit" class="btn btn-ghost btn-sm"
+                                style="color:var(--status-danger);border-color:rgba(239,68,68,0.3); font-family: var(--font-mono); text-transform: uppercase;">Purge
+                                Data</button>
+                        </form>
+                    </div>
+                </div>
+                <table class="data-table" id="alerts-table">
+                    <thead style="background: rgba(0,0,0,0.2);">
+                        <tr>
+                            <th
+                                style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
+                                Timestamp</th>
+                            <th
+                                style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
+                                Status</th>
+                            <th
+                                style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
+                                Classification</th>
+                            <th
+                                style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
+                                Details</th>
+                            <th
+                                style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
+                                Anomaly</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alerts-tbody">
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <div class="cyber-scanline" style="height: 2px;"></div>
+                                <p style="font-family: var(--font-mono);">Awaiting data uplink...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        /* ── Clock ── */
+        function updateClock() {
+            const now = new Date();
+            const el = document.getElementById('current-time');
+            if (el) el.textContent = now.toLocaleTimeString('en-GB', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function scrollToSection(id) {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* ── Chart.js Defaults ── */
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.plugins.legend.labels.boxWidth = 12;
+
+        /* ── Type Distribution Chart ── */
+        const typeCtx = document.getElementById('typeChart').getContext('2d');
+        const typeChart = new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#7c3aed', '#ec4899'],
+                    borderWidth: 0,
+                    spacing: 3,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } }
+                }
+            }
+        });
+
+        /* ── Trend Chart ── */
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        const trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Alerts',
+                    data: [],
+                    borderColor: '#00d4ff',
+                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#00d4ff',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, border: { dash: [3, 3] } },
+                    x: { grid: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        /* ── Load Data ── */
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+
+                document.getElementById('stat-total').textContent = data.total_alerts;
+                document.getElementById('stat-critical').textContent = data.critical_alerts;
+                document.getElementById('stat-warnings').textContent = data.warning_alerts;
+
+                // Avg risk
+                const avgScore = data.hourly_trend.length > 0
+                    ? Math.round(data.hourly_trend.reduce((a, h) => a + h.avg_score, 0) / data.hourly_trend.length)
+                    : 0;
+                document.getElementById('stat-detection-rate').textContent = avgScore;
+
+                // Type chart
+                typeChart.data.labels = data.type_distribution.map(t => t.type);
+                typeChart.data.datasets[0].data = data.type_distribution.map(t => t.count);
+                typeChart.update();
+
+                // Trend chart
+                trendChart.data.labels = data.hourly_trend.map(h => h.hour + ':00');
+                trendChart.data.datasets[0].data = data.hourly_trend.map(h => h.count);
+                trendChart.update();
+            } catch (e) { console.error('Stats load error:', e); }
+        }
+
+        async function loadAlerts() {
+            try {
+                const res = await fetch('/api/alerts?limit=50');
+                const logs = await res.json();
+                const tbody = document.getElementById('alerts-tbody');
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-icon" style="opacity: 0.5;">-</div><p>No alerts recorded — system is clean</p></td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(log => {
+                    let badgeClass = 'badge-info';
+                    let badgeText = 'INFO';
+                    if (log.risk_score >= 70) { badgeClass = 'badge-danger'; badgeText = 'CRITICAL'; }
+                    else if (log.risk_score >= 40) { badgeClass = 'badge-warn'; badgeText = 'WARNING'; }
+
+                    return `<tr>
+                    <td style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);">${log.timestamp}</td>
+                    <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                    <td style="font-weight:600;">${log.event_type}</td>
+                    <td style="color:var(--text-secondary);font-size:0.85rem;">${log.description}</td>
+                    <td style="font-family:var(--font-display);font-weight:700;font-size:1.1rem;">${log.risk_score}</td>
+                </tr>`;
+                }).join('');
+            } catch (e) { console.error('Alerts load error:', e); }
+        }
+
+        loadStats();
+        loadAlerts();
+    </script>
+</body>
+
+</html>

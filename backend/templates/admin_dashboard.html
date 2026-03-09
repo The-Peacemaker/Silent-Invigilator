@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Silent Invigilator</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard cyber-dashboard">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar glass-panel"
+            style="border-right: 1px solid rgba(0, 212, 255, 0.2); box-shadow: 4px 0 24px rgba(0,0,0,0.4);">
+            <div class="sidebar-brand">
+                <div class="brand-icon" style="background: transparent; box-shadow: 0 0 20px rgba(239,68,68,0.5);">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="SI Logo"
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                </div>
+                <div>
+                    <h2 style="text-shadow: 0 0 10px rgba(255,255,255,0.2);">Silent Invigilator</h2>
+                    <span class="role-badge"
+                        style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--status-danger); color: #fca5a5; text-shadow: 0 0 5px rgba(239, 68, 68, 0.8);">Administrator
+                        [Lvl 3]</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label" style="color: rgba(239,68,68,0.6);">Command View</div>
+                <a href="/admin" class="sidebar-link active"
+                    style="background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--status-danger);">
+                    <span class="link-icon" style="font-weight: 700; color: var(--status-danger);">#</span> Overview
+                </a>
+                <a href="#users-section" class="sidebar-link hover-glow" onclick="scrollToSection('users-section')">
+                    <span class="link-icon" style="font-weight: 700;">@</span> User Control
+                </a>
+                <a href="#alerts-section" class="sidebar-link hover-glow" onclick="scrollToSection('alerts-section')">
+                    <span class="link-icon" style="font-weight: 700;">!</span> Global Alert Logs
+                </a>
+                <div class="nav-section-label" style="color: rgba(239,68,68,0.6); margin-top: 15px;">Operations</div>
+                <a href="/monitor" class="sidebar-link monitor-link" style="position: relative; overflow: hidden;">
+                    <span class="link-icon" style="font-weight: 700; color: var(--status-safe);">▶</span> Live Interface
+                    <span class="live-dot"
+                        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; background: var(--status-danger); border-radius: 50%; animation: pulse-glow 2s infinite;"></span>
+                </a>
+                <div class="nav-section-label" style="color: rgba(239,68,68,0.6); margin-top: 15px;">System</div>
+                <a href="/" class="sidebar-link hover-glow">
+                    <span class="link-icon" style="font-weight: 700;">⌂</span> Homepage
+                </a>
+                <a href="/logout" class="sidebar-link hover-glow" style="color: var(--status-danger);">
+                    <span class="link-icon" style="font-weight: 700;">✕</span> Force Sign Out
+                </a>
+            </nav>
+            <div class="sidebar-footer" style="border-top: 1px solid rgba(255,255,255,0.05);">
+                <div class="sidebar-user">
+                    <div class="user-avatar" style="background: linear-gradient(135deg, #ef4444, #7c3aed);">{{
+                        session.get('full_name', 'A')[0] }}</div>
+                    <div class="user-info">
+                        <div class="user-name" style="font-weight: 600;">{{ session.get('full_name', 'Admin') }}</div>
+                        <div class="user-role-text"
+                            style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">ID: {{
+                            session.get('user_id', 'A-001') }}</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="dash-main">
+            <!-- Animated cyber background grid -->
+            <div class="cyber-grid" style="opacity: 0.3; pointer-events: none;"></div>
+
+            <div class="dash-header" style="position: relative; z-index: 1;">
+                <h1
+                    style="text-shadow: 0 0 15px rgba(255,255,255,0.1); letter-spacing: 1px; font-family: var(--font-display); display: flex; align-items: center; gap: 10px;">
+                    <button class="mobile-nav-toggle"
+                        onclick="document.querySelector('.sidebar').classList.toggle('show-sidebar')"
+                        style="margin-right: 10px;">☰</button>
+                    Root Terminal <span
+                        style="font-size: 1rem; color: var(--status-danger); font-weight: 400; letter-spacing: 2px;">//
+                        ADMIN</span>
+                </h1>
+                <div class="header-meta">
+                    <a href="/monitor" class="btn btn-primary btn-glow"
+                        style="box-shadow: 0 0 20px rgba(0,212,255,0.5); font-family: var(--font-mono); letter-spacing: 1px; padding: 10px 20px; border: 1px solid var(--accent-cyan); display: inline-flex; align-items: center; gap: 8px;">
+                        <span
+                            style="display: block; width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff; animation: pulse-glow 1.5s infinite;"></span>
+                        INITIALIZE UPLINK
+                    </a>
+                    <span id="current-time" class="badge badge-info"
+                        style="font-size:0.75rem; font-family: var(--font-mono); border: 1px solid rgba(0,212,255,0.3);"></span>
+                </div>
+            </div>
+
+            <!-- ── STATS CARDS ── -->
+            <div class="stats-grid" id="stats-grid" style="position: relative; z-index: 1;">
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon red"
+                        style="color: var(--status-danger); font-weight: bold; text-shadow: 0 0 10px rgba(239,68,68,0.5);">
+                        !</div>
+                    <div class="stat-number" id="stat-total-alerts" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Total Network Alerts</div>
+                </div>
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon yellow"
+                        style="color: var(--status-warn); font-weight: bold; text-shadow: 0 0 10px rgba(245,158,11,0.5);">
+                        ⚠</div>
+                    <div class="stat-number" id="stat-critical" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Critical Incidents</div>
+                </div>
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon cyan"
+                        style="color: var(--accent-cyan); font-weight: bold; text-shadow: 0 0 10px rgba(0,212,255,0.5);">
+                        i</div>
+                    <div class="stat-number" id="stat-warnings" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Warning Logs</div>
+                </div>
+                <div class="stat-card glass-panel cyber-hover">
+                    <div class="stat-icon purple"
+                        style="color: #c084fc; font-weight: bold; text-shadow: 0 0 10px rgba(192,132,252,0.5);">@</div>
+                    <div class="stat-number" id="stat-users" style="font-family: var(--font-mono);">—</div>
+                    <div class="stat-title" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        Active Operators</div>
+                </div>
+            </div>
+
+            <!-- ── CHARTS ROW 1 ── -->
+            <div class="charts-grid" id="stats-section">
+                <div class="chart-container glass-panel"
+                    style="border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                    <div class="chart-header"
+                        style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+                        <span class="chart-title"
+                            style="font-family: var(--font-mono); text-transform: uppercase; font-size: 0.8rem; color: var(--accent-cyan);">Detection
+                            Distribution Array</span>
+                    </div>
+                    <div class="chart-canvas-wrap" style="height:220px; margin-top: 15px;">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container glass-panel"
+                    style="border: 1px solid rgba(239,68,68,0.2); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                    <div class="chart-header"
+                        style="border-bottom: 1px solid rgba(239,68,68,0.2); padding-bottom: 15px;">
+                        <span class="chart-title"
+                            style="font-family: var(--font-mono); text-transform: uppercase; font-size: 0.8rem; color: var(--status-danger);">Hourly
+                            Threat Velocity</span>
+                    </div>
+                    <div class="chart-canvas-wrap" style="height:220px; margin-top: 15px;">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CHARTS ROW 2 ── -->
+            <div class="charts-grid">
+                <div class="chart-container glass-panel"
+                    style="border: 1px solid rgba(245,158,11,0.2); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                    <div class="chart-header"
+                        style="border-bottom: 1px solid rgba(245,158,11,0.2); padding-bottom: 15px;">
+                        <span class="chart-title"
+                            style="font-family: var(--font-mono); text-transform: uppercase; font-size: 0.8rem; color: var(--status-warn);">Risk
+                            Classification Matrix</span>
+                    </div>
+                    <div class="chart-canvas-wrap" style="height:220px; margin-top: 15px;">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container glass-panel"
+                    style="border: 1px solid rgba(16,185,129,0.2); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                    <div class="chart-header"
+                        style="border-bottom: 1px solid rgba(16,185,129,0.2); padding-bottom: 15px;">
+                        <span class="chart-title"
+                            style="font-family: var(--font-mono); text-transform: uppercase; font-size: 0.8rem; color: var(--status-safe);">System
+                            Stability Vector</span>
+                    </div>
+                    <div class="chart-canvas-wrap" style="height:220px; margin-top: 15px;">
+                        <canvas id="stabilityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CONTROL LAYER: OPERATORS & DIAGNOSTICS ── -->
+            <div class="bottom-dash-grid animate-fade-up" style="margin-top: 32px;">
+
+                <!-- Operator Management -->
+                <div class="data-table-wrap glass-panel" id="users-section" style="margin-bottom: 0;">
+                    <div class="table-header"
+                        style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 18px; margin-bottom: 24px;">
+                        <div>
+                            <h3
+                                style="font-family: var(--font-display); letter-spacing: 1px; display: flex; align-items: center; gap: 10px;">
+                                <span style="color: var(--accent-purple);">//</span> OPERATOR MANAGEMENT
+                                <span class="badge badge-info" id="operator-count-badge"
+                                    style="font-size: 0.6rem; background: rgba(124,58,237,0.1); border: 1px solid var(--accent-purple); color: var(--accent-purple);">0
+                                    ACTIVE</span>
+                            </h3>
+                            <p
+                                style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; font-family: var(--font-mono); text-transform: uppercase;">
+                                Credential vault & Level clearance</p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-ghost btn-sm" onclick="loadUsers()"
+                                style="font-family: var(--font-mono); font-size: 0.65rem;">REFRESH</button>
+                            <button class="btn btn-primary btn-sm btn-glow" onclick="openAddUserModal()"
+                                style="font-family: var(--font-mono); font-size: 0.65rem; background: var(--accent-purple); border-color: var(--accent-purple);">[+]
+                                PROVISION</button>
+                        </div>
+                    </div>
+                    <div class="table-container" style="overflow-x: auto; min-height: 250px;">
+                        <table class="data-table" id="users-table">
+                            <thead style="background: rgba(0,0,0,0.3);">
+                                <tr>
+                                    <th style="font-family: var(--font-mono); width: 80px;">SYS_ID</th>
+                                    <th style="font-family: var(--font-mono);">OPERATOR</th>
+                                    <th style="font-family: var(--font-mono);">CLEARANCE</th>
+                                    <th style="font-family: var(--font-mono); text-align: right;">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody">
+                                <tr>
+                                    <td colspan="4" class="empty-state" style="padding: 80px 0;">
+                                        <p
+                                            style="font-family: var(--font-mono); color: var(--accent-purple); letter-spacing: 2px;">
+                                            DECRYPTING VAULT...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Health & Activity -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="chart-container glass-panel"
+                        style="margin-bottom: 0; padding: 24px; border: 1px solid rgba(0, 212, 255, 0.15);">
+                        <div class="chart-header"
+                            style="border-bottom: 1px solid rgba(0, 212, 255, 0.1); padding-bottom: 14px; margin-bottom: 18px;">
+                            <span class="chart-title"
+                                style="font-family: var(--font-mono); text-transform: uppercase; font-size: 0.75rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+                                <span class="live-dot"
+                                    style="width: 6.5px; height: 6.5px; background: var(--status-safe);"></span> System
+                                Health
+                            </span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span
+                                    style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-secondary);">AI
+                                    CORE</span>
+                                <span class="badge badge-safe" style="font-size: 0.55rem;">OPERATIONAL</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span
+                                    style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-secondary);">MJPEG</span>
+                                <span class="badge badge-safe" style="font-size: 0.55rem;">ACTIVE</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span
+                                    style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-secondary);">LATENCY</span>
+                                <span
+                                    style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--status-safe);">12ms</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container glass-panel"
+                        style="margin-bottom: 0; padding: 24px; flex: 1; border: 1px solid rgba(124, 58, 237, 0.15);">
+                        <div class="chart-header"
+                            style="border-bottom: 1px solid rgba(124, 58, 237, 0.1); padding-bottom: 14px; margin-bottom: 18px;">
+                            <span class="chart-title"
+                                style="font-family: var(--font-mono); text-transform: uppercase; font-size: 0.75rem; color: var(--accent-purple);">Root
+                                Terminal</span>
+                        </div>
+                        <div id="terminal-output"
+                            style="background: rgba(0,0,0,0.5); border-radius: 6px; padding: 12px; font-family: var(--font-mono); font-size: 0.65rem; height: 160px; overflow-y: auto; color: #a5f3fc; line-height: 1.5;">
+                            <div style="opacity: 0.5;">[SYS] Booting root subsystem...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── GLOBAL INCIDENT SUBSYSTEM (Wide) ── -->
+            <div class="data-table-wrap glass-panel animate-fade-up" id="alerts-section"
+                style="position: relative; z-index: 1; border: 1px solid rgba(239,68,68,0.15); margin-top: 32px; padding: 32px;">
+                <div class="table-header"
+                    style="border-bottom: 1px solid rgba(239,68,68,0.2); padding-bottom: 20px; margin-bottom: 28px;">
+                    <div>
+                        <h3
+                            style="font-family: var(--font-display); letter-spacing: 1.5px; display: flex; align-items: center; gap: 12px;">
+                            <span style="color: var(--status-danger);">//</span> GLOBAL INCIDENT SUBSYSTEM
+                            <span class="badge badge-danger"
+                                style="font-size: 0.6rem; animation: pulse-glow 2s infinite; background: rgba(239,68,68,0.1); border: 1px solid var(--status-danger); color: var(--status-danger);">LIVE
+                                FEED</span>
+                        </h3>
+                        <p
+                            style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px;">
+                            Master violation directory (Archive Layer)</p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-ghost btn-sm" onclick="loadAlerts()"
+                            style="font-family: var(--font-mono); font-size: 0.7rem;">POLL ENGINE</button>
+                        <form action="/clear_logs" method="POST" style="display:inline;"
+                            onsubmit="return confirm('CRITICAL: PURGE MASTER DATABASE?\n\nThis will permanently wipe all incident archive data.');">
+                            <button type="submit" class="btn btn-danger btn-sm btn-glow"
+                                style="font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.5px;">[X]
+                                PURGE ARCHIVE</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="alert-list" id="alerts-list" style="max-height: 600px; padding-right: 12px;">
+                    <div class="empty-state" style="padding: 80px 0;">
+                        <p style="font-family: var(--font-mono); color: var(--status-danger); letter-spacing: 2.5px;">
+                            AWAITING UPLINK STREAMS...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══ ADD USER MODAL ═══ -->
+    <div class="modal-overlay" id="add-user-modal">
+        <div class="modal glass-panel"
+            style="border: 1px solid var(--accent-purple); box-shadow: 0 0 30px rgba(124,58,237,0.3);">
+            <h3 style="font-family: var(--font-display);"><span style="color: var(--accent-purple);">//</span> PROVISION
+                NEW OPERATOR</h3>
+            <div id="modal-error" style="display:none;" class="login-error"></div>
+            <div class="form-group">
+                <label class="form-label" style="color: var(--accent-purple);">Operator Name</label>
+                <input type="text" id="new-fullname" class="form-input cyber-input" placeholder="Enter formal name">
+            </div>
+            <div class="form-group">
+                <label class="form-label" style="color: var(--accent-purple);">Operator ID [Username]</label>
+                <input type="text" id="new-username" class="form-input cyber-input" placeholder="Enter target ID">
+            </div>
+            <div class="form-group">
+                <label class="form-label" style="color: var(--accent-purple);">Passphrase Encryption</label>
+                <input type="password" id="new-password" class="form-input cyber-input"
+                    placeholder="Min 4 chars of entropy">
+            </div>
+            <div class="form-group">
+                <label class="form-label" style="color: var(--accent-purple);">Clearance Level</label>
+                <select id="new-role" class="form-select cyber-input">
+                    <option value="teacher">Teacher [Lvl 2]</option>
+                    <option value="admin">Administrator [Lvl 3]</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeModal()"
+                    style="font-family: var(--font-mono);">ABORT</button>
+                <button class="btn btn-primary btn-glow" onclick="addUser()"
+                    style="font-family: var(--font-mono); background: var(--accent-purple);">EXECUTE
+                    PROVISIONING</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <style>
+        .cyber-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cyber-hover:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px) scale(1.01);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        #terminal-output::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #terminal-output::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        #terminal-output {
+            scroll-behavior: smooth;
+        }
+    </style>
+</body>
+
+</html>
