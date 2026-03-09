@@ -16,6 +16,41 @@ import time
 from collections import deque
 
 
+def _draw_modern_box(frame, x1, y1, x2, y2, label, color):
+    """Draws a futuristic, professional bounding box with corner brackets and a clean label."""
+    # Settings
+    thickness = 2
+    corner_length = max(15, int(0.15 * min(x2 - x1, y2 - y1)))  # dynamic corner size
+    
+    # 1. Draw subtle background tint for the box area
+    overlay = frame.copy()
+    cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)
+    cv2.addWeighted(overlay, 0.1, frame, 0.9, 0, frame)
+
+    # 2. Draw Corner Brackets (Top-left)
+    cv2.line(frame, (x1, y1), (x1 + corner_length, y1), color, thickness)
+    cv2.line(frame, (x1, y1), (x1, y1 + corner_length), color, thickness)
+    
+    # Bottom-left
+    cv2.line(frame, (x1, y2), (x1 + corner_length, y2), color, thickness)
+    cv2.line(frame, (x1, y2), (x1, y2 - corner_length), color, thickness)
+    
+    # Top-right
+    cv2.line(frame, (x2, y1), (x2 - corner_length, y1), color, thickness)
+    cv2.line(frame, (x2, y1), (x2, y1 + corner_length), color, thickness)
+    
+    # Bottom-right
+    cv2.line(frame, (x2, y2), (x2 - corner_length, y2), color, thickness)
+    cv2.line(frame, (x2, y2), (x2, y2 - corner_length), color, thickness)
+
+    # 3. Draw clean label box at the top
+    (text_w, text_h), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    cv2.rectangle(frame, (x1, y1 - text_h - 10), (x1 + text_w + 10, y1), color, -1)
+    
+    # Label text (white or inverted depending on brightness)
+    cv2.putText(frame, label, (x1 + 5, y1 - 5), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+
 class VideoCamera:
     def __init__(self):
         print("[CAMERA] Initializing Silent Invigilator AI Engine...")
@@ -164,17 +199,13 @@ class VideoCamera:
                 # Draw cached YOLO results
                 phone_now = False
                 for (x1, y1, x2, y2) in self.cached_phones:
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                    cv2.putText(frame, "PHONE", (x1, y1 - 8),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                    _draw_modern_box(frame, x1, y1, x2, y2, "PROHIBITED: PHONE", (0, 0, 255))
                     risk += 50
                     det_list.append("PHONE DETECTED")
                     phone_now = True
 
                 for (x1, y1, x2, y2) in self.cached_books:
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 165, 255), 2)
-                    cv2.putText(frame, "BOOK/PAPER", (x1, y1 - 8),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 165, 255), 2)
+                    _draw_modern_box(frame, x1, y1, x2, y2, "SUSPICIOUS: PAPER/BOOK", (0, 165, 255))
                     risk += 30
                     det_list.append("Material Detected")
 
@@ -247,13 +278,20 @@ class VideoCamera:
                 # Risk bar at top
                 cv2.rectangle(frame, (0, 0), (w, 32), (0, 0, 0), -1)
                 bar_w = int(w * self.anomaly_score / 100)
-                cv2.rectangle(frame, (0, 0), (bar_w, 32), col, -1)
-                cv2.putText(frame, f"RISK: {self.anomaly_score}%  |  {self.current_pose}",
-                            (10, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                if bar_w > 0:
+                    overlay_bar = frame.copy()
+                    cv2.rectangle(overlay_bar, (0, 0), (bar_w, 32), col, -1)
+                    cv2.addWeighted(overlay_bar, 0.4, frame, 0.6, 0, frame)
+                    
+                # Clean text with background for readability
+                cv2.putText(frame, f"RISK: {self.anomaly_score}%", (10, 22), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                cv2.putText(frame, f"POSE: {self.current_pose}", (140, 22), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
 
                 # Person count
-                cv2.putText(frame, f"Persons: {len(self.cached_persons)}",
-                            (w - 150, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                cv2.putText(frame, f"PERSONS: {len(self.cached_persons)}",
+                            (w - 120, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                             (255, 255, 255), 1)
 
                 # ─── Encode & Store ──────────────────────────────
@@ -347,7 +385,7 @@ class VideoCamera:
         ok, rvec, tvec = cv2.solvePnP(pts_3d, pts_2d, cam, dist)
         rmat, _ = cv2.Rodrigues(rvec)
         angles, _, _, _, _, _ = cv2.RQDecomp3x3(rmat)
-        return angles[0] * 360, angles[1] * 360   # pitch, yaw
+        return angles[0], angles[1]   # pitch, yaw
 
     def _gaze(self, landmarks):
         """Simple iris-based gaze direction."""
@@ -570,17 +608,13 @@ class DemoCamera:
                 # Draw cached YOLO results
                 phone_now = False
                 for (x1, y1, x2, y2) in self.cached_phones:
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                    cv2.putText(frame, "PHONE", (x1, y1 - 8),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                    _draw_modern_box(frame, x1, y1, x2, y2, "PROHIBITED: PHONE", (0, 0, 255))
                     risk += 50
                     detections.append("PHONE DETECTED")
                     phone_now = True
 
                 for (x1, y1, x2, y2) in self.cached_books:
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 165, 255), 2)
-                    cv2.putText(frame, "BOOK/PAPER", (x1, y1 - 8),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 165, 255), 2)
+                    _draw_modern_box(frame, x1, y1, x2, y2, "SUSPICIOUS: PAPER/BOOK", (0, 165, 255))
                     risk += 30
                     detections.append("Material Detected")
 
@@ -679,16 +713,18 @@ class DemoCamera:
                     ny = int(lm[1].y * h)
                     cv2.circle(frame, (nx, ny), 4, (0, 255, 255), -1)
 
-                    # Gaze arrow from nose
+                    # Gaze vector (laser-like)
+                    overlay_gaze = frame.copy()
                     if gaze_label == "Left":
-                        cv2.arrowedLine(frame, (nx, ny), (nx - 50, ny), (255, 255, 0), 2)
+                        cv2.line(overlay_gaze, (nx, ny), (max(0, nx - 200), ny), (255, 255, 0), 2)
                     elif gaze_label == "Right":
-                        cv2.arrowedLine(frame, (nx, ny), (nx + 50, ny), (255, 255, 0), 2)
+                        cv2.line(overlay_gaze, (nx, ny), (min(w, nx + 200), ny), (255, 255, 0), 2)
+                    cv2.addWeighted(overlay_gaze, 0.3, frame, 0.7, 0, frame)
 
-                    # Head pose direction arrow
+                    # Head pose direction array (subtle)
                     if abs(avg_yaw) > 15:
                         dx = int(avg_yaw * 2)
-                        cv2.arrowedLine(frame, (nx, ny - 30), (nx + dx, ny - 30), (0, 200, 255), 2)
+                        cv2.arrowedLine(frame, (nx, ny - 30), (nx + dx, ny - 30), (0, 200, 255), 1, tipLength=0.2)
 
                 else:
                     # No face detected
@@ -704,14 +740,21 @@ class DemoCamera:
                 col = (0, 255, 0) if risk < 30 else (0, 165, 255) if risk < 60 else (0, 0, 255)
                 cv2.rectangle(frame, (0, 0), (w, 32), (0, 0, 0), -1)
                 bar_w = int(w * risk / 100)
-                cv2.rectangle(frame, (0, 0), (bar_w, 32), col, -1)
-                cv2.putText(frame, f"RISK: {risk}%  |  {pose_label}",
-                            (10, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-                cv2.putText(frame, f"Persons: {1 if face_found else 0}",
-                            (w - 150, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                if bar_w > 0:
+                    overlay_bar = frame.copy()
+                    cv2.rectangle(overlay_bar, (0, 0), (bar_w, 32), col, -1)
+                    cv2.addWeighted(overlay_bar, 0.4, frame, 0.6, 0, frame)
+                    
+                cv2.putText(frame, f"RISK: {risk}%", (10, 22), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                cv2.putText(frame, f"POSE: {pose_label}", (140, 22), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
+                            
+                cv2.putText(frame, f"PERSONS: {1 if face_found else 0}",
+                            (w - 120, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                             (255, 255, 255), 1)
 
-                # Scanning line
+                # Scanning line (subtle)
                 scan_y = int((self.frame_count * 3) % h)
                 cv2.line(frame, (0, scan_y), (w, scan_y), (0, 255, 0), 1)
 
