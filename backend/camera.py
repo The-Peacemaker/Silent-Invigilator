@@ -119,8 +119,8 @@ class VideoCamera:
         yolo = None
         try:
             from ultralytics import YOLO
-            yolo = YOLO('yolov8n.pt')
-            print("[CAMERA] YOLOv8n loaded OK")
+            yolo = YOLO('yolov8s.pt')
+            print("[CAMERA] YOLOv8s loaded OK")
         except Exception as e:
             print(f"[CAMERA] YOLO FAILED: {e}  (phone detection disabled)")
 
@@ -134,13 +134,17 @@ class VideoCamera:
                 
                 if is_active and not has_cam:
                     print("[CAMERA] Hardware requested. Opening webcam...")
-                    for backend in [cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_ANY]:
-                        try:
-                            cap = cv2.VideoCapture(0, backend)
-                            if cap.isOpened():
-                                print(f"[CAMERA] Opened with backend {backend}")
-                                break
-                        except: pass
+                    # Try external camera (1) first, then fallback to built-in (0)
+                    for cam_idx in [1, 0]:
+                        for backend in [cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_ANY]:
+                            try:
+                                cap = cv2.VideoCapture(cam_idx, backend)
+                                if cap.isOpened():
+                                    print(f"[CAMERA] Opened camera {cam_idx} with backend {backend}")
+                                    break
+                            except: pass
+                        if cap is not None and cap.isOpened():
+                            break
                     has_cam = cap is not None and cap.isOpened()
                     if has_cam:
                         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -178,7 +182,7 @@ class VideoCamera:
                         results = yolo.predict(
                             frame,
                             classes=[0, 67, 73],   # person, phone, book
-                            conf=0.35,
+                            conf=0.20,             # High sensitivity
                             verbose=False,
                             imgsz=320              # Small = fast
                         )
@@ -200,7 +204,7 @@ class VideoCamera:
                 phone_now = False
                 for (x1, y1, x2, y2) in self.cached_phones:
                     _draw_modern_box(frame, x1, y1, x2, y2, "PROHIBITED: PHONE", (0, 0, 255))
-                    risk += 50
+                    risk = max(risk, 100)  # INSTANT MAX RISK
                     det_list.append("PHONE DETECTED")
                     phone_now = True
 
@@ -263,7 +267,14 @@ class VideoCamera:
 
                 # ─── Update Shared State ─────────────────────────
                 self.score_history.append(risk)
-                self.anomaly_score = int(np.mean(self.score_history))
+                
+                # If a phone is detected, bypass the moving average smoothing
+                if phone_now:
+                    self.anomaly_score = 100
+                    self.score_history[-1] = 100
+                else:
+                    self.anomaly_score = int(np.mean(self.score_history))
+                    
                 self.face_detected = face_found
                 self.phone_detected = phone_now
                 self.detections = list(set(det_list))
@@ -397,9 +408,9 @@ class VideoCamera:
             if abs(d) < 1e-6:
                 return "Center"
             ratio = (iris.x - ri.x) / d
-            if ratio > 0.62:
+            if ratio > 0.58:
                 return "Left"
-            elif ratio < 0.38:
+            elif ratio < 0.42:
                 return "Right"
         except:
             pass
@@ -441,8 +452,8 @@ class DemoCamera:
         self.yolo = None
         try:
             from ultralytics import YOLO
-            self.yolo = YOLO('yolov8n.pt')
-            print("[AI] YOLOv8n loaded OK for DemoCamera")
+            self.yolo = YOLO('yolov8s.pt')
+            print("[AI] YOLOv8s loaded OK for DemoCamera")
         except Exception as e:
             print(f"[AI] YOLO FAILED: {e}  (phone detection disabled)")
 
@@ -519,9 +530,9 @@ class DemoCamera:
             r_ratio = np.linalg.norm(r_iris - r_outer) / (np.linalg.norm(r_inner - r_outer) + 1e-6)
 
             avg = (l_ratio + r_ratio) / 2
-            if avg < 0.35:
+            if avg < 0.40:
                 return "Right"
-            elif avg > 0.65:
+            elif avg > 0.60:
                 return "Left"
             else:
                 return "Center"
@@ -544,13 +555,17 @@ class DemoCamera:
 
                 if is_active and not has_cam:
                     print("[AI] Hardware requested. Opening webcam hardware...")
-                    for backend in [cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_ANY]:
-                        try:
-                            cap = cv2.VideoCapture(0, backend)
-                            if cap.isOpened():
-                                print(f"[AI] Webcam opened with backend {backend}")
-                                break
-                        except: pass
+                    # Try external camera (1) first, then fallback to built-in (0)
+                    for cam_idx in [1, 0]:
+                        for backend in [cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_ANY]:
+                            try:
+                                cap = cv2.VideoCapture(cam_idx, backend)
+                                if cap.isOpened():
+                                    print(f"[AI] Webcam {cam_idx} opened with backend {backend}")
+                                    break
+                            except: pass
+                        if cap is not None and cap.isOpened():
+                            break
                     has_cam = cap is not None and cap.isOpened()
                     if has_cam:
                         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -587,7 +602,7 @@ class DemoCamera:
                         res_yolo = self.yolo.predict(
                             frame,
                             classes=[0, 67, 73],   # person, phone, book
-                            conf=0.35,
+                            conf=0.20,             # High sensitivity
                             verbose=False,
                             imgsz=320              # Small = fast
                         )
@@ -609,7 +624,7 @@ class DemoCamera:
                 phone_now = False
                 for (x1, y1, x2, y2) in self.cached_phones:
                     _draw_modern_box(frame, x1, y1, x2, y2, "PROHIBITED: PHONE", (0, 0, 255))
-                    risk += 50
+                    risk = max(risk, 100) # INSTANT MAX RISK
                     detections.append("PHONE DETECTED")
                     phone_now = True
 
@@ -648,22 +663,8 @@ class DemoCamera:
                     fy2 = min(h, fy2)
 
                     # ── Draw REAL face mesh (468 landmarks) ──
-                    # Tesselation (subtle)
-                    self.mp_drawing.draw_landmarks(
-                        image=frame,
-                        landmark_list=fl,
-                        connections=self.mp_face_mesh.FACEMESH_TESSELATION,
-                        landmark_drawing_spec=None,
-                        connection_drawing_spec=self.mp_drawing_styles.get_default_face_mesh_tesselation_style()
-                    )
-                    # Contours (visible)
-                    self.mp_drawing.draw_landmarks(
-                        image=frame,
-                        landmark_list=fl,
-                        connections=self.mp_face_mesh.FACEMESH_CONTOURS,
-                        landmark_drawing_spec=None,
-                        connection_drawing_spec=self.mp_drawing_styles.get_default_face_mesh_contours_style()
-                    )
+                    # Removed Tesselation and Contours for a cleaner look.
+                    
                     # Irises
                     self.mp_drawing.draw_landmarks(
                         image=frame,
@@ -760,7 +761,11 @@ class DemoCamera:
 
                 # ── Update shared state ───────────────────
                 self.score_history.append(risk)
-                self.anomaly_score = int(np.mean(list(self.score_history)))
+                if phone_now:
+                    self.anomaly_score = 100
+                    self.score_history[-1] = 100
+                else:
+                    self.anomaly_score = int(np.mean(list(self.score_history)))
                 self.face_detected = face_found
                 self.phone_detected = phone_now
                 self.current_pose = pose_label
