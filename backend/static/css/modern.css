@@ -1617,13 +1617,15 @@ a:hover {
 .video-alert-overlay-dark {
     position: absolute;
     inset: 0;
-    background: rgba(239, 68, 68, 0.85);
-    backdrop-filter: blur(4px);
+    pointer-events: none;
+    background: transparent;
+    box-shadow: inset 0 0 0 10px rgba(239, 68, 68, 0.8), inset 0 0 40px rgba(239, 68, 68, 0.5);
     display: none;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding-top: 40px;
     z-index: 20;
-    animation: flash-in 0.3s ease;
+    animation: flash-border 1s infinite alternate;
 }
 
 .video-alert-overlay-dark.show {
@@ -1633,13 +1635,18 @@ a:hover {
 .alert-overlay-content {
     text-align: center;
     color: #fff;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.5);
 }
 
 .alert-overlay-content h2 {
     font-family: var(--font-display);
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
+    color: var(--status-danger);
 }
 
 .alert-overlay-content p {
@@ -1724,6 +1731,16 @@ a:hover {
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@keyframes flash-border {
+    from {
+        box-shadow: inset 0 0 0 5px rgba(239, 68, 68, 0.8), inset 0 0 40px rgba(239, 68, 68, 0.2);
+    }
+
+    to {
+        box-shadow: inset 0 0 0 10px rgba(239, 68, 68, 1), inset 0 0 80px rgba(239, 68, 68, 0.6);
     }
 }
 
