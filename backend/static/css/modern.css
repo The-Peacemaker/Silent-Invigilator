@@ -3,7 +3,7 @@
    Premium glassmorphism UI with cyan/purple accent palette
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;500;600;700;800;900&family=Fira+Code:wght@300;400;500;600;700&display=swap');
 
 /* ── DESIGN TOKENS ──────────────────────────────────────── */
 :root {
@@ -50,9 +50,9 @@
     --border-active: rgba(0, 212, 255, 0.3);
 
     /* Typography */
-    --font-display: 'Outfit', sans-serif;
-    --font-body: 'Inter', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Orbitron', 'Outfit', sans-serif;
+    --font-body: 'Fira Code', 'Inter', monospace;
+    --font-mono: 'Share Tech Mono', 'JetBrains Mono', monospace;
 
     /* Spacing */
     --radius-sm: 8px;
@@ -89,6 +89,8 @@ body {
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
 }
+
+
 
 a {
     color: var(--accent-cyan);
