@@ -123,3 +123,69 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
     });
 });
+
+/* ── 3D VIDEO SCROLL ANIMATION (GSAP) ───────────────────── */
+(function initVideoScroll() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const video = document.getElementById("hero-video");
+    const container = document.getElementById("ai-vision-scroll");
+    
+    if (!video || !container) return;
+
+    let initAttempted = false;
+
+    function initTrigger() {
+        if (initAttempted) return;
+        if (!video.duration || !isFinite(video.duration)) {
+             setTimeout(initTrigger, 100);
+             return;
+        }
+        initAttempted = true;
+        
+        // Pause video to manually scrub
+        video.pause();
+        
+        // 1. Create the ScrollTrigger to pin the container
+        let tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: container,
+                start: "top top",
+                end: "+=500%", // Longer scroll distance for slower scrub
+                pin: true, // Keep the section pinned while scrubbing
+                scrub: 1, // Smooth scrubbing
+                onUpdate: (self) => {
+                    // This directly updates the video time based on scroll progress
+                    if (video.duration && isFinite(video.duration)) {
+                        // Cap at exactly 90% of the video to never hit the frozen end frame
+                        video.currentTime = self.progress * (video.duration * 0.90); 
+                    }
+                }
+            }
+        });
+
+        // 2. Animate the text overlays in sequence based on scroll %
+        // Text 1: Fades in early, fades out
+        tl.to("#msg-1", { opacity: 1, y: "-50%", duration: 1 })
+          .to("#msg-1", { opacity: 0, y: "-70%", duration: 1 }, "+=0.5")
+          
+        // Text 2: Fades in next
+          .to("#msg-2", { opacity: 1, y: "-50%", duration: 1 })
+          .to("#msg-2", { opacity: 0, y: "-70%", duration: 1 }, "+=0.5")
+          
+        // Text 3: The powerful final statement
+          .to("#msg-3", { opacity: 1, y: "-50%", duration: 1.5 })
+          .to("#msg-3", { opacity: 0, scale: 1.2, duration: 1 }, "+=0.5");
+    }
+
+    if (video.readyState >= 1) {
+        initTrigger();
+    }
+    video.addEventListener('loadedmetadata', initTrigger);
+    
+    // Fallback play if initialization totally fails
+    setTimeout(() => {
+        if (!initAttempted) video.play().catch(e => console.log(e));
+    }, 2000);
+})();

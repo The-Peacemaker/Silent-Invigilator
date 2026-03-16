@@ -8,7 +8,7 @@
         content="The Silent Invigilator — AI-powered autonomous exam malpractice detection system using real-time behavioral analysis, face tracking, and object detection.">
     <title>The Silent Invigilator — AI Exam Surveillance</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}?v=7">
 </head>
 
 <body>
@@ -78,73 +78,95 @@
         </div>
     </section>
 
+    <!-- ═══ 3D SCROLL EXPERIENCE ═══ -->
+    <section id="ai-vision-scroll" style="position: relative; background: #000;">
+        <div class="sticky-video-container" style="position: relative; width: 100vw; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <video id="hero-video" preload="auto" muted playsinline style="width: 100vw; height: 100vh; object-fit: cover; opacity: 1; mix-blend-mode: screen; filter: brightness(1.2);">
+                <source src="{{ url_for('static', filename='videos/animate_scrub.mp4') }}" type="video/mp4">
+            </video>
+            
+            <!-- Floating Text Overlays -->
+            <div class="scroll-msg" id="msg-1" style="position: absolute; top: 50%; left: 8%; transform: translateY(-30%); opacity: 0;">
+                <h2 style="font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.5rem); color: #fff; font-weight: 800; line-height: 1.1;">Unseen.<br><span class="gradient-text">Uncompromised.</span></h2>
+                <p style="color: var(--text-secondary); margin-top: 10px; font-size: 1.2rem; max-width: 400px;">Silent 360-degree environmental monitoring without disrupting the exam flow.</p>
+            </div>
+            
+            <div class="scroll-msg" id="msg-2" style="position: absolute; top: 50%; right: 8%; transform: translateY(-30%); text-align: right; opacity: 0;">
+                <h2 style="font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.5rem); color: #fff; font-weight: 800; line-height: 1.1;">Absolute<br><span class="gradient-text">Vigilance.</span></h2>
+                <p style="color: var(--text-secondary); margin-top: 10px; font-size: 1.2rem; max-width: 400px; margin-left: auto;">Powered by edge AI neural networks that never sleep, blink, or get distracted.</p>
+            </div>
+            
+            <div class="scroll-msg" id="msg-3" style="position: absolute; top: 80%; left: 50%; transform: translate(-50%, -30%); text-align: center; opacity: 0; width: 100%;">
+                <h2 style="font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 4.5rem); color: #fff; font-weight: 900; letter-spacing: -2px;">Zero <span style="color: var(--status-danger);">Malpractice</span>.</h2>
+            </div>
+        </div>
+    </section>
+
     <!-- ═══ FEATURES ═══ -->
-    <section class="section" id="features" style="background: var(--bg-secondary);">
+    <section class="section" id="features" style="background: rgba(10, 10, 26, 0.8); backdrop-filter: blur(15px); border-top: 1px solid var(--border-subtle); padding: 120px 40px;">
         <div class="section-header">
-            <div class="section-label">Capabilities</div>
-            <h2 class="section-title">Intelligent Detection <span class="gradient-text">Engine</span></h2>
-            <p class="section-subtitle">
-                Powered by YOLOv8 object detection and MediaPipe face mesh — the system
-                identifies malpractice in real-time with zero manual intervention.
+            <div class="section-label" style="color: var(--accent-cyan); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; margin-bottom: 16px;">[ CORE CAPABILITIES ]</div>
+            <h2 class="section-title" style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; letter-spacing: -1px; margin-bottom: 24px;">Intelligent Detection <span class="gradient-text">Engine</span></h2>
+            <p class="section-subtitle" style="font-size: 1.2rem; margin: 0 auto; max-width: 650px; color: var(--text-secondary); line-height: 1.8;">
+                Powered by YOLOv8 object detection and MediaPipe face mesh — the system autonomously identifies malpractice anomalies in real-time with zero manual intervention.
             </p>
         </div>
-        <div class="features-grid">
-            <div class="feature-card glass-panel animate-fade-up stagger-1">
-                <div class="feature-icon">👁️</div>
-                <h3>Gaze & Focus Tracking</h3>
-                <p>Monitors eye direction and head orientation to detect when a student
-                    looks away from their paper — identifying potential copying behavior.</p>
+        <div class="features-grid" style="gap: 32px; padding-top: 20px;">
+            <div class="feature-card glass-panel animate-fade-up stagger-1" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                <div class="feature-icon" style="background: rgba(0, 212, 255, 0.1); color: var(--accent-cyan); width: 60px; height: 60px; font-size: 1.6rem; border-radius: 12px; margin-bottom: 24px;">👁️</div>
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;">Gaze & Focus Tracking</h3>
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">Continuously monitors spatial eye direction and head pitch/yaw orientation to detect sustained off-screen focus, accurately identifying potential unauthorized copying behavior.</p>
             </div>
-            <div class="feature-card glass-panel animate-fade-up stagger-2">
-                <div class="feature-icon">📱</div>
-                <h3>Phone Detection</h3>
-                <p>YOLOv8-powered object detection instantly identifies mobile phones,
-                    smartwatches, and other prohibited electronic devices in the frame.</p>
+            
+            <div class="feature-card glass-panel animate-fade-up stagger-2" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                <div class="feature-icon" style="background: rgba(124, 58, 237, 0.1); color: var(--accent-purple); width: 60px; height: 60px; font-size: 1.6rem; border-radius: 12px; margin-bottom: 24px;">📱</div>
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;">Prohibited Hardware</h3>
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">Advanced YOLOv8 integration instantly isolates and alerts on mobile phones, smartwatches, and other unauthorized electronic devices anywhere within the camera frame.</p>
             </div>
-            <div class="feature-card glass-panel animate-fade-up stagger-3">
-                <div class="feature-icon">📄</div>
-                <h3>Cheat Sheet Detection</h3>
-                <p>Detects small papers, notes, and unauthorized materials being used
-                    during examinations through advanced object classification.</p>
+            
+            <div class="feature-card glass-panel animate-fade-up stagger-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                <div class="feature-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--status-warn); width: 60px; height: 60px; font-size: 1.6rem; border-radius: 12px; margin-bottom: 24px;">📄</div>
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;">Material Detection</h3>
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">Deep learning algorithms accurately classify and flag the presence of hidden cheat sheets, unauthorized physical notes, and illicit printed materials.</p>
             </div>
-            <div class="feature-card glass-panel animate-fade-up stagger-4">
-                <div class="feature-icon">📊</div>
-                <h3>Behavioral Scoring</h3>
-                <p>Composite anomaly scoring algorithm combines all detection signals
-                    into a single risk score for instant threat assessment.</p>
+            
+            <div class="feature-card glass-panel animate-fade-up stagger-4" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                <div class="feature-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--status-safe); width: 60px; height: 60px; font-size: 1.6rem; border-radius: 12px; margin-bottom: 24px;">📊</div>
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;">Behavioral Synthesis</h3>
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">A proprietary composite scoring matrix aggregates all individual detection signals into a unified, actionable timeline index for absolute threat precision.</p>
             </div>
         </div>
     </section>
 
     <!-- ═══ HOW IT WORKS ═══ -->
-    <section class="section" id="how-it-works">
+    <section class="section" id="how-it-works" style="background: var(--bg-primary); padding: 120px 40px;">
         <div class="section-header">
-            <div class="section-label">Process</div>
-            <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
-            <p class="section-subtitle">
-                From camera feed to alert generation — a seamless pipeline of AI-driven analysis.
+            <div class="section-label" style="color: var(--accent-purple); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; margin-bottom: 16px;">[ ARCHITECTURE LOGIC ]</div>
+            <h2 class="section-title" style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; letter-spacing: -1px; margin-bottom: 24px;">Systemic <span class="gradient-text">Operations</span></h2>
+            <p class="section-subtitle" style="font-size: 1.2rem; margin: 0 auto; max-width: 650px; color: var(--text-secondary); line-height: 1.8;">
+                From optical ingestion to unified alert generation — a flawless, highly optimized pipeline of pure artificial intelligence.
             </p>
         </div>
-        <div class="steps-grid">
-            <div class="step-card glass-panel animate-fade-up stagger-1">
-                <div class="step-number">01</div>
-                <h3>Capture</h3>
-                <p>Live MJPEG video stream captured from exam hall cameras at 30 FPS resolution.</p>
+        <div class="steps-grid" style="gap: 40px; text-align: left; max-width: 1200px;">
+            <div class="step-card glass-panel animate-fade-up stagger-1" style="background: transparent; border: none; box-shadow: none; padding: 20px; text-align: left;">
+                <div class="step-number" style="font-size: 4.5rem; color: rgba(255,255,255,0.05); font-family: var(--font-display); background: none; -webkit-text-fill-color: initial; opacity: 1; margin-bottom: 8px;">01</div>
+                <h3 style="font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;">Optical Ingestion</h3>
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">A secure, encrypted MJPEG optical stream captures high-fidelity spatial data from hardware sensors.</p>
             </div>
-            <div class="step-card glass-panel animate-fade-up stagger-2">
-                <div class="step-number">02</div>
-                <h3>Analyze</h3>
-                <p>YOLOv8 + MediaPipe process each frame — detecting faces, objects, gaze direction, and head pose.</p>
+            <div class="step-card glass-panel animate-fade-up stagger-2" style="background: transparent; border: none; box-shadow: none; padding: 20px; text-align: left;">
+                <div class="step-number" style="font-size: 4.5rem; color: rgba(255,255,255,0.05); font-family: var(--font-display); background: none; -webkit-text-fill-color: initial; opacity: 1; margin-bottom: 8px;">02</div>
+                <h3 style="font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;">Neural Parsing</h3>
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">Proprietary YOLOv8 matrices combined with MediaPipe facial geometry instantly calculate vectors and tensors.</p>
             </div>
-            <div class="step-card glass-panel animate-fade-up stagger-3">
-                <div class="step-number">03</div>
-                <h3>Score</h3>
-                <p>Anomaly scoring engine combines all signals into a real-time risk assessment (0-100 scale).</p>
+            <div class="step-card glass-panel animate-fade-up stagger-3" style="background: transparent; border: none; box-shadow: none; padding: 20px; text-align: left;">
+                <div class="step-number" style="font-size: 4.5rem; color: rgba(255,255,255,0.05); font-family: var(--font-display); background: none; -webkit-text-fill-color: initial; opacity: 1; margin-bottom: 8px;">03</div>
+                <h3 style="font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;">Risk Algorithm</h3>
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">A strict heuristics engine models the extracted behavior nodes to formulate a highly precise zero-to-one hundred threat score.</p>
             </div>
-            <div class="step-card glass-panel animate-fade-up stagger-4">
-                <div class="step-number">04</div>
-                <h3>Alert</h3>
-                <p>Instant notifications to invigilators when risk exceeds threshold with detailed evidence logs.</p>
+            <div class="step-card glass-panel animate-fade-up stagger-4" style="background: transparent; border: none; box-shadow: none; padding: 20px; text-align: left;">
+                <div class="step-number" style="font-size: 4.5rem; color: rgba(0,212,255,0.1); font-family: var(--font-display); background: none; -webkit-text-fill-color: initial; opacity: 1; margin-bottom: 8px;">04</div>
+                <h3 style="font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;">Action Protocol</h3>
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">Violations immediately breach thresholds, silently dispatching encrypted payload logs and alerts to the administrator dashboard.</p>
             </div>
         </div>
     </section>
@@ -168,7 +190,9 @@
     </footer>
 
     <!-- ═══ HOMEPAGE JS ═══ -->
-    <script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="{{ url_for('static', filename='js/homepage.js') }}?v=7"></script>
 </body>
 
 </html>
