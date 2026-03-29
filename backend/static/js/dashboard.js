@@ -71,6 +71,7 @@ let sessionAlertCount = 0;
 let lastAlertTs = 0;
 const ALERT_COOLDOWN = 2500; // ms
 let isPolling = false;
+let backendFPS = 0;
 
 /* ── HELPERS ────────────────────────────────────────────── */
 
@@ -271,11 +272,10 @@ function updateDashboard(data) {
     document.getElementById('met-pitch').textContent = `${pitch.toFixed(1)}°`;
 
     // Persons count (from detections list)
-    const personMatch = detections.find(d => d.toLowerCase().includes('student'));
-    if (personMatch) {
-        const numMatch = personMatch.match(/\d+/);
-        if (numMatch) document.getElementById('met-persons').textContent = numMatch[0];
-    }
+    const persons = typeof data.persons === 'number' ? data.persons : 0;
+    document.getElementById('met-persons').textContent = String(persons);
+
+    backendFPS = typeof data.fps === 'number' ? data.fps : backendFPS;
 
     /* ── HEAD POSE BARS ─────────────── */
     document.getElementById('pv-yaw').textContent = `${yaw.toFixed(1)}°`;
@@ -313,17 +313,13 @@ function updateDashboard(data) {
     });
 }
 
-/* ── FPS MOCK (backend doesn't return fps yet) ─────────── */
-let lastPoll = Date.now();
+/* ── FPS from backend telemetry ─────────────────────────── */
 function tickFPS() {
-    const now = Date.now();
-    const fps = Math.round(1000 / (now - lastPoll));
-    lastPoll = now;
-    const clamped = Math.min(fps, 30);
-    document.getElementById('fps-display').textContent = `FPS: ${clamped}`;
+    const fps = Math.max(0, Math.round(backendFPS || 0));
+    document.getElementById('fps-display').textContent = `FPS: ${fps}`;
     // update HUD
     const hud = document.getElementById('hud-bl');
-    if (hud) hud.textContent = `YOLOv8 + MediaPipe · ${clamped} FPS`;
+    if (hud) hud.textContent = `YOLOv8 + MediaPipe · ${fps} FPS`;
 }
 
 /* ── START ──────────────────────────────────────────────── */

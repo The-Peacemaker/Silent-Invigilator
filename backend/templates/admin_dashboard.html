@@ -41,7 +41,7 @@
                     <span class="link-icon" style="font-weight: 700;">!</span> Global Alert Logs
                 </a>
                 <div class="nav-section-label" style="color: rgba(239,68,68,0.6); margin-top: 15px;">Operations</div>
-                <a href="/monitor" class="sidebar-link monitor-link" style="position: relative; overflow: hidden;">
+                <a href="{{ monitor_url if monitor_url else '#' }}" class="sidebar-link monitor-link{% if not monitor_url %} disabled{% endif %}" style="position: relative; overflow: hidden;{% if not monitor_url %} opacity: 0.6; pointer-events: none;{% endif %}">
                     <span class="link-icon" style="font-weight: 700; color: var(--status-safe);">▶</span> Live Interface
                     <span class="live-dot"
                         style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; background: var(--status-danger); border-radius: 50%; animation: pulse-glow 2s infinite;"></span>
@@ -84,7 +84,7 @@
                         ADMIN</span>
                 </h1>
                 <div class="header-meta">
-                    <a href="/monitor" class="btn btn-primary btn-glow"
+                    <a href="{{ monitor_url if monitor_url else '#' }}" class="btn btn-primary btn-glow{% if not monitor_url %} disabled{% endif %}"
                         style="box-shadow: 0 0 20px rgba(0,212,255,0.5); font-family: var(--font-mono); letter-spacing: 1px; padding: 10px 20px; border: 1px solid var(--accent-cyan); display: inline-flex; align-items: center; gap: 8px;">
                         <span
                             style="display: block; width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff; animation: pulse-glow 1.5s infinite;"></span>

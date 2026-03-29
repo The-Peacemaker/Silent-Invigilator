@@ -41,7 +41,7 @@
                     <span class="link-icon" style="font-weight: 700;">@</span> Statistics
                 </a>
                 <div class="nav-section-label" style="color: var(--accent-cyan-dim); margin-top: 15px;">Monitoring</div>
-                <a href="/monitor" class="sidebar-link monitor-link" style="position: relative; overflow: hidden;">
+                <a href="{{ monitor_url if monitor_url else '#' }}" class="sidebar-link monitor-link{% if not monitor_url %} disabled{% endif %}" style="position: relative; overflow: hidden;{% if not monitor_url %} opacity: 0.6; pointer-events: none;{% endif %}">
                     <span class="link-icon" style="font-weight: 700; color: var(--status-safe);">▶</span> Live Camera
                     Feed
                     <span class="live-dot"
@@ -85,7 +85,7 @@
                         TEACHER</span>
                 </h1>
                 <div class="header-meta">
-                    <a href="/monitor" class="btn btn-primary btn-glow"
+                    <a href="{{ monitor_url if monitor_url else '#' }}" class="btn btn-primary btn-glow{% if not monitor_url %} disabled{% endif %}"
                         style="box-shadow: 0 0 20px rgba(0,212,255,0.5); font-family: var(--font-mono); letter-spacing: 1px; padding: 10px 20px; border: 1px solid var(--accent-cyan); display: inline-flex; align-items: center; gap: 8px;">
                         <span
                             style="display: block; width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff; animation: pulse-glow 1.5s infinite;"></span>
@@ -189,6 +189,12 @@
                                 Classification</th>
                             <th
                                 style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
+                                Student</th>
+                            <th
+                                style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
+                                Level</th>
+                            <th
+                                style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
                                 Details</th>
                             <th
                                 style="font-family: var(--font-mono); letter-spacing: 1px; color: var(--text-secondary);">
@@ -197,7 +203,7 @@
                     </thead>
                     <tbody id="alerts-tbody">
                         <tr>
-                            <td colspan="5" class="empty-state">
+                            <td colspan="7" class="empty-state">
                                 <div class="cyber-scanline" style="height: 2px;"></div>
                                 <p style="font-family: var(--font-mono);">Awaiting data uplink...</p>
                             </td>
@@ -315,7 +321,7 @@
                 const tbody = document.getElementById('alerts-tbody');
 
                 if (logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-icon" style="opacity: 0.5;">-</div><p>No alerts recorded — system is clean</p></td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon" style="opacity: 0.5;">-</div><p>No alerts recorded — system is clean</p></td></tr>';
                     return;
                 }
 
@@ -329,6 +335,8 @@
                     <td style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);">${log.timestamp}</td>
                     <td><span class="badge ${badgeClass}">${badgeText}</span></td>
                     <td style="font-weight:600;">${log.event_type}</td>
+                    <td style="font-family:var(--font-mono);font-size:0.82rem;">${log.student_id ? '#' + log.student_id : '—'}</td>
+                    <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);">${(log.alert_level || 'info').toUpperCase()}${log.escalation ? ' / ' + String(log.escalation).toUpperCase() : ''}</td>
                     <td style="color:var(--text-secondary);font-size:0.85rem;">${log.description}</td>
                     <td style="font-family:var(--font-display);font-weight:700;font-size:1.1rem;">${log.risk_score}</td>
                 </tr>`;
