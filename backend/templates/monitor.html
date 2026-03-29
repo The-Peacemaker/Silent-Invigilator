@@ -31,6 +31,13 @@
                 MONITORING</span>
         </div>
         <div class="monitor-topbar-right">
+            <label for="camera-select" class="topbar-pill" style="display:inline-flex;align-items:center;gap:6px;">
+                Camera
+                <select id="camera-select" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#e2e8f0;border-radius:6px;padding:2px 6px;">
+                    <option value="camera_0">camera_0</option>
+                </select>
+            </label>
+            <span class="topbar-pill" id="active-camera-label">Source: Laptop Camera (Built-in)</span>
             <a href="/dashboard" class="btn btn-ghost btn-sm">← Back to Dashboard</a>
             <span class="topbar-pill" id="clock-display">00:00:00</span>
             <span class="topbar-pill" id="fps-display">FPS: —</span>
@@ -53,7 +60,7 @@
                 </div>
 
                 <!-- Video Stream -->
-                <img id="video-stream" src="/video_feed" alt="Camera feed loading..."
+                <img id="video-stream" src="" alt="Camera feed loading..."
                     style="width:100%;height:100%;object-fit:contain;display:block;background:#000;">
 
                 <!-- Alert Overlay -->
@@ -237,6 +244,9 @@
             }
         });
 
+        const MONITOR_SESSION_ID = "{{ session_id }}";
+        let currentCameraSource = 'camera_0';
+
         /* ═══ STATE ═══ */
         let sessionAlertCount = 0;
         let lastAlertTs = 0;
@@ -286,7 +296,7 @@
             if (isPolling) return;
             isPolling = true;
 
-            fetch('/status')
+            fetch(`/status?session_id=${encodeURIComponent(MONITOR_SESSION_ID)}&camera_source=${encodeURIComponent(currentCameraSource)}`)
                 .then(r => r.json())
                 .then(data => { isPolling = false; updateDashboard(data); })
                 .catch(() => {
@@ -296,6 +306,58 @@
                     pill.classList.remove('live-pill');
                 });
         }
+
+        function setVideoSource() {
+            const videoStream = document.getElementById('video-stream');
+            videoStream.src = `/video_feed?session_id=${encodeURIComponent(MONITOR_SESSION_ID)}&camera_source=${encodeURIComponent(currentCameraSource)}&t=${Date.now()}`;
+        }
+
+        async function applyCameraSource(source, persist = true) {
+            currentCameraSource = source || 'camera_0';
+            const sel = document.getElementById('camera-select');
+            const lbl = document.getElementById('active-camera-label');
+            if (sel && sel.value !== currentCameraSource) {
+                sel.value = currentCameraSource;
+            }
+            if (sel && lbl) {
+                const selectedText = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : currentCameraSource;
+                lbl.textContent = `Source: ${selectedText}`;
+            }
+            if (persist) {
+                try {
+                    await fetch(`/api/sessions/${encodeURIComponent(MONITOR_SESSION_ID)}/camera-source`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ camera_source: currentCameraSource })
+                    });
+                } catch (_) { }
+            }
+            setVideoSource();
+        }
+
+        async function initCameraSelector() {
+            const sel = document.getElementById('camera-select');
+            try {
+                const res = await fetch(`/api/cameras?session_id=${encodeURIComponent(MONITOR_SESSION_ID)}`);
+                const data = await res.json();
+                const cams = Array.isArray(data.cameras) ? data.cameras : [{ id: 'camera_0', name: 'Laptop Camera' }];
+                sel.innerHTML = cams.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                currentCameraSource = data.selected_source || cams[0].id || 'camera_0';
+                sel.value = currentCameraSource;
+            } catch (_) {
+                sel.innerHTML = '<option value="camera_0">Laptop Camera (Built-in)</option>';
+                currentCameraSource = 'camera_0';
+                sel.value = currentCameraSource;
+            }
+
+            sel.addEventListener('change', () => {
+                applyCameraSource(sel.value, true);
+            });
+
+            await applyCameraSource(currentCameraSource, false);
+        }
+
+        let backendFPS = 0;
 
         function updateDashboard(data) {
             const pill = document.getElementById('conn-pill');
@@ -370,11 +432,10 @@
             document.getElementById('met-yaw').textContent = `${yaw.toFixed(1)}°`;
             document.getElementById('met-pitch').textContent = `${pitch.toFixed(1)}°`;
 
-            const personMatch = detections.find(d => d.toLowerCase().includes('student'));
-            if (personMatch) {
-                const numMatch = personMatch.match(/\d+/);
-                if (numMatch) document.getElementById('met-persons').textContent = numMatch[0];
-            }
+            const persons = typeof data.persons === 'number' ? data.persons : 0;
+            document.getElementById('met-persons').textContent = String(persons);
+
+            backendFPS = typeof data.fps === 'number' ? data.fps : backendFPS;
 
             /* Video Alert Overlay */
             const overlay = document.getElementById('video-alert-overlay');
@@ -397,18 +458,17 @@
         }
 
         /* FPS */
-        let lastPoll = Date.now();
         function tickFPS() {
-            const now = Date.now();
-            const fps = Math.min(Math.round(1000 / (now - lastPoll)), 30);
-            lastPoll = now;
+            const fps = Math.max(0, Math.round(backendFPS || 0));
             document.getElementById('fps-display').textContent = `FPS: ${fps}`;
             const hud = document.getElementById('hud-bl');
             if (hud) hud.textContent = `YOLOv8 + MediaPipe · ${fps} FPS`;
         }
 
-        setInterval(() => { pollStatus(); tickFPS(); }, 1000);
-        pollStatus();
+        initCameraSelector().then(() => {
+            setInterval(() => { pollStatus(); tickFPS(); }, 1000);
+            pollStatus();
+        });
     </script>
 </body>
 
