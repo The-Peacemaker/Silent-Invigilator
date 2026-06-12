@@ -10,13 +10,75 @@ By fusing keypoint-based geometric tracking (gaze, head orientation, and facial 
 
 ## System Architecture
 
-The Silent Invigilator processes input video streams through a modular sequential pipeline. The frame processing pipeline is divided into three primary layers:
+The Silent Invigilator is designed around a decoupled, multi-client ecosystem consisting of a high-concurrency Flask backend server, a localized standalone desktop client, an administrative web console, and a cross-platform mobile invigilation application.
 
-1. **Feature Extraction Layer**: Leverages Google MediaPipe Face Mesh, Hand Landmark, and Pose detection libraries to extract dense 3D facial geometry (468 landmarks), bilateral hand skeletons (21 landmarks per hand), and joint coordinates.
-2. **Deep Learning Inference Layer**: Runs a lightweight YOLOv8 model for prohibited object detection (mobile phones and books/papers) in parallel with an IoU-based tracking filter (ByteTrack) to identify and track multiple candidates.
-3. **Heuristic and Scoring Layer**: Evaluates extracted geometric parameters against mathematical indicators, updates a sliding-window temporal queue, computes a composite anomaly score, and writes incidents asynchronously to an SQLite database.
+### Ecosystem Topology
+
+```mermaid
+graph LR
+    subgraph Capture Hardware
+        Webcam[USB Webcam / Camera Source]
+    end
+
+    subgraph Desktop Client [Localized Client]
+        SI[silent_invigilator.py <br>Standalone GUI]
+    end
+
+    subgraph Central Server [Flask Backend & DB]
+        App[app.py <br>REST & WebSocket API]
+        DB[(SQLite DB <br>invigilator.db)]
+        Logger[Background Logger Thread]
+        App <--> Logger
+        Logger <--> DB
+    end
+
+    subgraph Client Applications [Invigilator Interfaces]
+        Web[Web-Based console <br>Socket.IO Telemetry]
+        Mobile[Flutter Mobile App <br>JWT Auth & Alerts]
+    end
+
+    Webcam --> SI
+    Webcam --> App
+    SI -- Local DB Logs --> DB
+    App <--> Web
+    App <--> Mobile
+```
+
+The system processes input video streams through a modular, multi-layered sequential pipeline:
+
+1. **Feature Extraction Layer**:
+   * **MediaPipe Face Mesh**: Extracts dense 3D facial geometry (468 landmarks) and iris structures in both the desktop client and web server.
+   * **MediaPipe Hands**: Utilized in the localized desktop client to extract bilateral hand skeletons (21 landmarks per hand) for proximity tracking.
+   * **MediaPipe Pose**: Pre-initialized in the desktop client to support future structural joint alignment hooks (currently bypassed in active scoring).
+2. **Deep Learning Inference Layer**: Runs a lightweight YOLOv8 model (`yolov8n.pt`/`yolov8s.pt`) for prohibited object detection (mobile phones and books/papers) in parallel with an IoU-based tracking filter (ByteTrack) to identify and track multiple candidates.
+3. **Heuristic and Scoring Layer**: Evaluates extracted geometric parameters, updates a sliding-window temporal queue, computes a composite anomaly score, and writes incidents asynchronously to an SQLite database.
 
 ![System Architecture](report/system_architecture.png)
+
+### Frame Processing Pipeline
+
+```mermaid
+graph TD
+    A[Video Capture Thread] --> B[Frame Processing Dispatcher]
+    B --> C[Geometric Feature Extraction]
+    B --> D[Deep Learning Inference]
+    C --> C1[MediaPipe Face Mesh <br>468 Landmarks & Irises]
+    C -- "Pre-initialized (Future Hook)" --> C2[MediaPipe Pose <br>Body Joint Landmarks]
+    C --> C3[MediaPipe Hands <br>Bilateral Hand Landmarks - Desktop Only]
+    D --> D1[YOLOv8 Object Detection <br>Cell Phone & Book Classes]
+    D --> D2[ByteTrack Multi-Person Tracker <br>Persistent Student Tracking]
+    C1 --> E1[3D Head Pose solverPnP <br>Pitch, Yaw]
+    C1 --> E2[Eye Gaze Ratio Analysis <br>Iris Deviation Vectors]
+    C1 --> E3[Mouth Aspect Ratio <br>Oral Activity Detection]
+    C3 --> E4[Hand-to-Face Proximity - Desktop Only]
+    D1 --> F1[Bounding Box Intersections <br>IoU Merging]
+    D2 --> F2[Track ID Mapping]
+    E1 & E2 & E3 & E4 & F1 & F2 --> G[Track-Level Scoring Engine]
+    G --> H[Temporal Risk Accumulator <br>EMA + Sliding Window]
+    H --> I[Malpractice Alert Dispatcher]
+    I --> J[Background DB Logger <br>SQLite logs & alerts]
+    I --> K[Websocket Real-Time Event Emitters]
+```
 
 ---
 
@@ -134,11 +196,27 @@ Where:
 
 When the overall score exceeds $`60`$, a formal malpractice alert is logged to the backend and recorded in the database.
 
+![Anomaly Risk Graph](report/anomaly_score_graph.png)
+
+---
+
+## Performance Latency Benchmarks
+
+To evaluate the feasibility of real-time deployment across various client configurations, a profiling run was conducted measuring frame processing delays (in milliseconds) and throughput (FPS) across five pipeline configurations on both CPU and GPU hardwares.
+
+![Pipeline Performance](report/pipeline_performance.png)
+
+### Key Performance Insights:
+* **Baseline Overhead**: Camera frame ingestion and buffer updating consume minimal overhead (~1.8 ms to 2.1 ms), allowing high-frequency grabbing.
+* **Feature Extraction Core**: FaceMesh evaluation is highly optimized, executing at ~8.2 ms on GPU (~122 FPS) and ~24.5 ms on CPU (~41 FPS), proving its capability as a primary heuristic checker.
+* **Deep Learning Bottleneck**: The addition of YOLOv8n object detection increases latency to ~21 ms on GPU and ~82.4 ms on CPU. When SAHI slicing hyper-inference is activated for detecting distant small objects, latency escalates to ~58.6 ms on GPU (~17 FPS) and ~315 ms on CPU (~3.2 FPS).
+* **Mitigation Recommendation**: In CPU-bound standalone environments, SAHI slicing should be disabled, and YOLOv8 inference cadence should be set to execute every $N=15$ frames to maintain real-time throughput.
+
 ---
 
 ## Technical Stack and Components
 
-The codebase is structured into three primary sub-systems:
+The codebase is structured into four primary sub-systems:
 
 ```text
 ├── backend/
@@ -148,6 +226,12 @@ The codebase is structured into three primary sub-systems:
 │   ├── requirements.txt      # Core Python dependencies
 │   ├── static/               # CSS styling sheets and JavaScript dashboard charts
 │   └── templates/            # HTML structural layouts for the monitoring dashboard
+├── mobile_app/
+│   ├── lib/                  # Dart application source code (Flutter)
+│   │   ├── main.dart         # Mobile application entrypoint
+│   │   ├── screens/          # Login, Admin, Teacher dashboard views
+│   │   └── services/         # REST API clients (JWT auth, telemetry logs)
+│   └── pubspec.yaml          # Flutter package configuration and assets
 ```
 
 ### 1. Multi-Threaded Camera Interface (`camera.py`)
@@ -228,25 +312,41 @@ Open a web browser and navigate to `http://127.0.0.1:5000`. The interface will d
 
 ## Configuration and Parameter Tuning
 
-All system thresholds can be customized in the configuration dictionary within the `VideoCamera` class (`camera.py`) or `SilentInvigilator` class (`silent_invigilator.py`):
+All system thresholds can be customized in the configuration dictionary within the `SilentInvigilator` class (`silent_invigilator.py`):
 
 ```python
 self.thresholds = {
-    'head_yaw_max': 30,          # Maximum allowable yaw rotation (degrees)
-    'head_pitch_max': 25,        # Maximum allowable pitch rotation (degrees)
-    'gaze_deviation_max': 0.06,  # Maximum normalized horizontal gaze deviation
-    'sustained_look_away_frames': 45, # Duration before an alert is triggered (~1.5s)
-    'phone_confidence': 0.50,    # Minimum confidence score for YOLO phone detection
-    'multiple_faces_frames': 15, # Frame threshold for multiple face alerts (~0.5s)
+    'head_yaw_limit': 25,      # Maximum allowable head yaw rotation (degrees)
+    'head_pitch_limit': 20,    # Maximum allowable head pitch rotation (degrees)
+    'gaze_center_min': 0.35,   # Relative iris position lower bound (0-1)
+    'gaze_center_max': 0.65,   # Relative iris position upper bound (0-1)
+    'mouth_open_ratio': 0.5,   # Mouth Aspect Ratio threshold for talking detection
+    'phone_confidence': 0.45,   # Minimum confidence score for YOLO phone detection
+    'sustained_frames': 45,    # Frame threshold for sustained anomalies (~1.5s)
 }
 ```
 
-### Parameter Scoring Weights
-Weights are located in the anomaly scoring function:
-* Phone Detection: **+50 points**
+### Parameter Scoring Systems
+
+#### 1. Additive Scoring Engine (Standalone Client: `silent_invigilator.py`)
+Calculated dynamically per frame based on active violations:
+* Prohibited Object (Phone): **+50 points**
 * Multiple Face Detection: **+40 points**
-* Out-of-bounds Head Rotation: **+25 points**
+* Absent / No Face Detected: **+30 points**
+* Mouth Open / Talking (MAR): **+25 points**
+* Out-of-bounds Head Yaw Rotation: **+20 points**
+* Out-of-bounds Head Pitch Rotation: **+20 points**
 * Eye Gaze Aversion: **+15 points**
+* Hand Near Face Proximity: **+10 points**
+* Sustained Head Turn / Talking streak: **+20 points**
+
+#### 2. Composite Temporal Scoring Engine (Web Backend: `camera.py`)
+Computes a rolling temporal cheating score ($S_t \in [0, 100]$) per student track:
+* Prohibited Object (Phone/Book): **Weight 0.40** (Enforces immediate minimum score of **85** if phone is present)
+* Eye Gaze Aversion ($E_{\tau}$): **Weight 0.22**
+* Head Pose Out-of-bounds ($H_{\tau}$): **Weight 0.16**
+* Head Down-tilt Pose ($D_{\tau}$): **Weight 0.14**
+* Short-term Temporal Anomaly Correlation ($C_{\tau}$): **Weight 0.08**
 
 ---
 
