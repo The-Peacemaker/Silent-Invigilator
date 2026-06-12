@@ -35,9 +35,11 @@ s \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K \begin{bmatrix} R & T \end{bmatr
 Where:
 * $`s`$ is an arbitrary scale factor.
 * $`K`$ is the camera intrinsic matrix, initialized using the frame resolution boundaries and focal length approximation:
-  ```math
-  K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}
-  ```
+
+```math
+K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}
+```
+
 * $`R \in SO(3)`$ is the rotation matrix, and $`T \in \mathbb{R}^3`$ is the translation vector.
 
 We compute $`R`$ and $`T`$ by minimizing the reprojection error using Levenberg-Marquardt optimization:
