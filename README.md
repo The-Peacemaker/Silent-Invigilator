@@ -1,520 +1,253 @@
-# 🎓 THE SILENT INVIGILATOR
+# The Silent Invigilator: Multi-Modal Real-Time Exam Surveillance using Deep Learning and Spatial-Temporal Anomaly Scoring
 
-## Autonomous Real-Time Exam Malpractice Detection System Using Behavioral Analysis
+## Abstract
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![OpenCV](https://img.shields.io/badge/OpenCV-4.x-green.svg)
-![MediaPipe](https://img.shields.io/badge/MediaPipe-Latest-orange.svg)
-![YOLOv8](https://img.shields.io/badge/YOLOv8-Nano-red.svg)
+Surveillance of academic assessments is critical for maintaining academic integrity. However, manual invigilation is subject to human fatigue, cognitive overload, and subconscious bias. This repository presents **The Silent Invigilator**, an autonomous, non-intrusive exam invigilation system that integrates real-time computer vision, deep learning inference, and spatial-temporal anomaly scoring to monitor and flag suspicious candidate behavior. 
 
----
-
-## 🎯 AIM
-
-To develop an **automated, non-intrusive exam invigilation system** that utilizes advanced computer vision and deep learning algorithms to detect, analyze, and flag suspicious student behaviors in real-time. The primary objective is to eliminate human error and bias in surveillance by implementing a multi-modal AI capable of identifying complex malpractice indicators such as:
-
-- ❌ Unauthorized object usage (mobile phones)
-- 👀 Frequent gaze aversion
-- 🤔 Abnormal physical movements
-- 👥 Multiple person detection
-- 🖐️ Suspicious hand gestures
+By fusing keypoint-based geometric tracking (gaze, head orientation, and facial structures) with object detection (YOLOv8) and student tracking (ByteTrack), the system constructs a multi-modal behavioral vector for each student. A temporal sliding-window risk accumulator filters transient physiological movements (such as blinking or natural adjustments) while registering persistent, high-confidence malpractice patterns. The system includes a dual deployment topology: a standalone, localized desktop runtime and a full-stack Flask-based dashboard for remote administration.
 
 ---
 
-## 🔧 TECHNOLOGY STACK
+## System Architecture
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Programming Language** | Python 3.10+ | Core implementation |
-| **Computer Vision** | OpenCV (cv2) | Video processing & display |
-| **Pose Estimation** | Google MediaPipe | Face Mesh, Hand & Pose tracking |
-| **Object Detection** | YOLOv8 Nano (Ultralytics) | Mobile phone detection |
-| **Numerical Processing** | NumPy | Mathematical operations |
+The Silent Invigilator processes input video streams through a modular sequential pipeline. The frame processing pipeline is divided into three primary layers:
 
----
+1. **Feature Extraction Layer**: Leverages Google MediaPipe Face Mesh, Hand Landmark, and Pose detection libraries to extract dense 3D facial geometry (468 landmarks), bilateral hand skeletons (21 landmarks per hand), and joint coordinates.
+2. **Deep Learning Inference Layer**: Runs a lightweight YOLOv8 model for prohibited object detection (e.g., mobile phones) in parallel with an IoU-based tracking filter (ByteTrack) to identify and track multiple candidates.
+3. **Heuristic and Scoring Layer**: Evaluates extracted geometric parameters against mathematical indicators, updates a sliding-window temporal queue, computes a composite anomaly score, and writes incidents asynchronously to an SQLite database.
 
-## ✨ FEATURES
-
-### 🎯 Core Detection Capabilities
-
-✅ **Face Detection & Counting**
-- Detects up to 3 faces simultaneously
-- Alerts when multiple persons are present
-- Real-time face mesh visualization
-
-✅ **3D Head Pose Estimation**
-- Precise **Pitch** (up/down), **Yaw** (left/right), and **Roll** (tilt) angles
-- **Stabilized readings** using exponential smoothing
-- Threshold-based alerts for head turning
-
-✅ **Advanced Eye Gaze Tracking**
-- **Iris Ratio Analysis**: Calculates relative position of iris within eye corners
-- Detects looking Left/Right/Center with high accuracy
-- Robust against head movement
-
-✅ **Mouth & Talking Detection**
-- **Mouth Aspect Ratio (MAR)** analysis
-- Detects talking, yawning, or mouth opening
-- Filters momentary movements
-
-✅ **Hand Gesture Analysis**
-- Bilateral hand tracking (up to 2 hands)
-- Detection of hands near face region
-- Skeletal hand visualization
-
-✅ **Body Posture Monitoring**
-- Shoulder alignment analysis
-- Unusual posture detection
-
-✅ **Mobile Phone Detection**
-- YOLOv8 Nano object detection
-- Real-time bounding box visualization
-- Confidence scoring (>50% threshold)
-
-✅ **Temporal Behavior Analysis**
-- Sustained vs. momentary behavior filtering
-- Flag-based tracking for prolonged suspicious activity
-- Anomaly score accumulation over time
-
-### 🎨 Modern Dashboard UI
-
-✅ **Professional Sidebar Interface**
-- **Risk Level Meter**: Visual color-coded bar (Green/Yellow/Red)
-- **Status Indicators**: Live icons for Head, Gaze, Mouth, Phone, Presence
-- **Recent Alerts Log**: Scrolling list of last 5 detections
-- **FPS & Time**: Real-time performance monitoring
-
-✅ **Comprehensive Reporting**
-- JSON report generation with timestamp
-- Detailed statistics (avg/max/min anomaly scores)
-- Behavioral metrics (head pose, gaze, detections)
-- Final verdict with risk assessment
+![System Architecture](report/system_architecture.png)
 
 ---
 
-## 📥 INPUTS REQUIRED
+## Algorithmic and Mathematical Formulation
 
-1. **Video Feed**
-   - Continuous real-time video from webcam (default)
-   - Or pre-recorded video file (MP4, AVI, etc.)
-   - Minimum resolution: 640x480 (1280x720 recommended)
+### 1. 3D Head Pose Estimation (Perspective-n-Point)
 
-2. **System Resources**
-   - Python 3.10+ runtime environment
-   - CPU/GPU for inference (GPU recommended for YOLOv8)
-   - Webcam/camera device
+To estimate head orientation in three-dimensional space without requiring dedicated depth sensors, the system solves the Perspective-n-Point (PnP) problem. Given a set of $n$ 3D facial reference points in world coordinates (based on an anthropometric model) and their corresponding 2D projections on the image plane, we define the camera projection matrix.
 
-3. **Pre-trained Models** (Auto-downloaded)
-   - MediaPipe Face Mesh weights
-   - YOLOv8 Nano model (`yolov8n.pt`)
+Let $P_w = [X_w, Y_w, Z_w, 1]^T$ be a 3D point in world coordinates, and $p = [u, v, 1]^T$ be its image projection. The pinhole camera model defines:
+
+$$s \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K [R \mid T] \begin{bmatrix} X_w \\ Y_w \\ Z_w \\ 1 \end{bmatrix}$$
+
+Where:
+* $s$ is an arbitrary scale factor.
+* $K$ is the camera intrinsic matrix, initialized using the frame resolution boundaries and focal length approximation:
+  $$K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}$$
+* $R \in SO(3)$ is the rotation matrix, and $T \in \mathbb{R}^3$ is the translation vector.
+
+We compute $R$ and $T$ by minimizing the reprojection error using Levenberg-Marquardt optimization:
+
+$$\min_{R, T} \sum_{i=1}^n \left\| p_i - \text{proj}(K, R, T, P_{w,i}) \right\|^2$$
+
+The rotation matrix $R$ is decomposed into Euler angles representing Pitch ($\theta$), Yaw ($\psi$), and Roll ($\phi$) by calculating:
+
+$$\theta = \arctan2\left(-R_{20}, \sqrt{R_{00}^2 + R_{10}^2}\right)$$
+$$\psi = \arctan2(R_{10}, R_{00})$$
+$$\phi = \arctan2(R_{21}, R_{22})$$
+
+A violation is flagged if $|\theta| > \theta_{\text{max}}$ or $|\psi| > \psi_{\text{max}}$.
+
+### 2. Eye Gaze Tracking (Iris Center Deviation)
+
+Gaze tracking calculates the ratio of the iris center position relative to the horizontal boundaries of the eye. This index is robust against individual variations in eye shapes.
+
+Let $L_{\text{inner}}$ and $L_{\text{outer}}$ denote the 2D pixel coordinates of the inner and outer eye corners (derived from landmarks 133 and 33 for the left eye, and 362 and 263 for the right eye). Let $I_{\text{center}}$ be the centroid of the iris boundary landmarks (468 to 472 for the left eye). The horizontal gaze ratio $\gamma$ is formulated as:
+
+$$\gamma = \frac{\| I_{\text{center}} - L_{\text{inner}} \|_2}{\| L_{\text{outer}} - L_{\text{inner}} \|_2}$$
+
+Where $\|\cdot\|_2$ denotes the Euclidean distance. The normalized gaze deviation $G_{\text{dev}}$ is defined as:
+
+$$G_{\text{dev}} = \left| \gamma - \gamma_{\text{neutral}} \right|$$
+
+Where $\gamma_{\text{neutral}} \approx 0.5$ represents the baseline when the subject looks straight ahead. A gaze aversion event is registered if $G_{\text{dev}} > G_{\text{max}}$.
+
+### 3. Talking Detection (Mouth Aspect Ratio - MAR)
+
+To detect oral communication (talking or reading aloud), the system measures the Mouth Aspect Ratio (MAR) over a sliding temporal window. 
+
+Using the inner lip coordinates, let $p_1$ and $p_5$ represent the horizontal corner landmarks, and let $(p_2, p_8)$, $(p_3, p_7)$, and $(p_4, p_6)$ represent vertical landmark pairs across the upper and lower inner lips:
+
+$$\text{MAR} = \frac{\| p_2 - p_8 \|_2 + \| p_3 - p_7 \|_2 + \| p_4 - p_6 \|_2}{2 \| p_1 - p_5 \|_2}$$
+
+The raw MAR values are smoothed using an exponential moving average (EMA) to prevent false positives from brief facial expressions:
+
+$$\text{MAR}_{\text{smoothed}, t} = \alpha_{\text{mar}} \cdot \text{MAR}_t + (1 - \alpha_{\text{mar}}) \cdot \text{MAR}_{\text{smoothed}, t-1}$$
+
+A talking event is triggered if $\text{MAR}_{\text{smoothed}, t} > \text{MAR}_{\text{threshold}}$.
+
+### 4. Prohibited Object Detection (YOLOv8 & SAHI)
+
+For detecting unauthorized physical items (such as mobile phones), the system runs parallel YOLOv8 Nano inference. Let $I_f$ be the input frame of dimensions $W \times H$. The YOLO network outputs a set of bounding boxes $B = \{b_1, b_2, \dots, b_k\}$, where each box $b_i = (x_c, y_c, w, h, c, P_{\text{conf}})$:
+* $(x_c, y_c)$ represents the box center coordinates.
+* $(w, h)$ represents the width and height of the box.
+* $c$ represents the class identifier (e.g., class 67 for "cell phone" in MS COCO).
+* $P_{\text{conf}}$ represents the class probability.
+
+To enhance small-object detection (such as a phone placed far from the camera lens), the system optionally integrates Slicing Aided Hyper Inference (SAHI). The frame $I_f$ is partitioned into overlapping grid slices of size $W_s \times H_s$ with an overlap ratio $\sigma$:
+
+$$I_f = \bigcup_{m,n} S_{m,n}$$
+
+Inference is executed on each slice independently, and predictions are aggregated using Non-Maximum Suppression (NMS) with an Intersection-over-Union (IoU) threshold $\beta_{\text{iou}}$ to resolve overlapping bounding box conflicts:
+
+$$\text{IoU}(b_a, b_b) = \frac{\text{Area}(b_a \cap b_b)}{\text{Area}(b_a \cup b_b)}$$
+
+### 5. Composite Spatial-Temporal Anomaly Scoring
+
+Malpractice is rarely defined by a single instant of behavioral deviation. Therefore, the system calculates a composite, time-averaged anomaly score at each frame $t$.
+
+Let $X_t \in \{0, 1\}^5$ be a binary indicator vector representing active alerts at frame $t$:
+$$X_t = [I_{\text{phone}}, I_{\text{multiple\_faces}}, I_{\text{head\_pose}}, I_{\text{gaze}}, I_{\text{hand\_proximity}}]^T$$
+
+We define a diagonal weight matrix $W$:
+$$W = \text{diag}(w_{\text{phone}}, w_{\text{multiple\_faces}}, w_{\text{head\_pose}}, w_{\text{gaze}}, w_{\text{hand\_proximity}})$$
+
+The instantaneous anomaly score $A_t$ is calculated as:
+
+$$A_t = \min\left(100, \sum_{i=1}^5 W_{ii} X_{t,i}\right)$$
+
+To filter out natural movements (such as looking down at a writing sheet), the system routes $A_t$ through a temporal sliding-window accumulator. Let $D_t$ be a FIFO queue containing the scores of the last $N$ frames (where $N$ corresponds to a 2-second buffer, approximately 60 frames):
+
+$$D_t = \{A_{t-N+1}, A_{t-N+2}, \dots, A_t\}$$
+
+The smoothed temporal anomaly score $S_t$ is the weighted mean of the sliding queue:
+
+$$S_t = \sum_{k=0}^{N-1} \lambda^k A_{t-k} \Big/ \sum_{k=0}^{N-1} \lambda^k$$
+
+Where $\lambda \in (0, 1]$ is a temporal decay parameter. When $S_t > \tau_{\text{alert}}$, a formal malpractice alert is logged to the backend and recorded in the database.
 
 ---
 
-## 📤 EXPECTED OUTCOMES
+## Technical Stack and Components
 
-1. **Real-time Video Processing**
-   - Live annotated video feed with overlays
-   - Head orientation angles displayed (Yaw, Pitch)
-   - Gaze status (OK/AWAY)
+The codebase is structured into three primary sub-systems:
 
-2. **Object Detection**
-   - Bounding boxes around detected mobile phones
-   - Confidence scores displayed
+```text
+├── backend/
+│   ├── app.py                # Flask Web API, websocket server, & dashboard router
+│   ├── camera.py             # Multi-threaded frame grabber, MediaPipe wrappers, and YOLOv8 pipeline
+│   ├── silent_invigilator.py # Standalone OpenCV GUI executable with logging utilities
+│   ├── requirements.txt      # Core Python dependencies
+│   ├── static/               # CSS styling sheets and JavaScript dashboard charts
+│   └── templates/            # HTML structural layouts for the monitoring dashboard
+```
 
-3. **Status Indicators**
-   - Current behavior status ("✓ Focused", "Looking LEFT", etc.)
-   - Color-coded anomaly score (Green/Yellow/Red)
-   - Alert count
+### 1. Multi-Threaded Camera Interface (`camera.py`)
+To prevent network request latency from dropping the frame rate of the ML pipeline, the camera interface runs on a separate thread. This thread continuously grabs frames from the hardware camera buffer and updates a shared memory location, allowing the main processor thread to query the latest frame asynchronously.
 
-4. **Alert System**
-   - Real-time alerts for anomaly score > 60
-   - Red banner notifications for critical events
-   - Sustained behavior flagging
+### 2. Standalone Application (`silent_invigilator.py`)
+A self-contained Python application that opens an OpenCV window showing the camera stream with HUD overlays. It records the session, computes risk thresholds, and writes a structural JSON report on exit.
 
-5. **Final Report (JSON)**
-   ```json
-   {
-     "exam_session": { ... },
-     "statistics": { ... },
-     "behavior_analysis": { ... },
-     "alerts": [ ... ],
-     "verdict": { ... }
-   }
+### 3. Web Dashboard (`app.py`)
+A Flask web server that handles real-time MJPEG video streaming. It exposes JSON endpoints for real-time telemetry (anomaly graphs, active violations, and total counts) and displays a Brutalist-style dashboard for invigilators.
+
+---
+
+## Installation and Deployment
+
+### Prerequisites
+
+* Python 3.10 or higher
+* Pip (Python Package Installer)
+* C++ Build Tools (required for specific dependency compilations under Windows)
+* Webcam or network-attached IP camera
+
+### Step-by-Step Setup
+
+1. **Clone the Repository** and navigate to the project directory:
+   ```bash
+   cd silent-invigilator
+   ```
+
+2. **Initialize a Virtual Environment**:
+   ```bash
+   python -m venv .venv
+   ```
+
+3. **Activate the Environment**:
+   * **Windows (PowerShell)**:
+     ```powershell
+     .venv\Scripts\Activate.ps1
+     ```
+   * **Linux / macOS**:
+     ```bash
+     source .venv/bin/activate
+     ```
+
+4. **Install Dependencies**:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
    ```
 
 ---
 
-## 🚀 INSTALLATION
+## Execution Guide
 
-### Prerequisites
-
-```bash
-Python 3.10 or higher
-pip (Python package manager)
-Webcam or video source
-```
-
-### Step 1: Clone/Download Repository
-
-```bash
-cd silent-invigilator
-```
-
-### Step 2: Create Virtual Environment (Recommended)
-
-```bash
-python -m venv .venv
-```
-
-**Activate virtual environment:**
-- Windows: `.venv\Scripts\activate`
-- macOS/Linux: `source .venv/bin/activate`
-
-### Step 3: Install Dependencies
-
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-**Dependency Breakdown:**
-- `opencv-python`: Video capture and display
-- `mediapipe`: Face, hand, and pose detection
-- `numpy`: Numerical operations
-- `ultralytics`: YOLOv8 object detection
-
----
-
-## 🎮 USAGE
-
-### Basic Usage (Webcam)
+### 1. Running the Standalone Desktop Application
+To launch the OpenCV-based desktop window, run the following:
 
 ```bash
 cd backend
 python silent_invigilator.py
 ```
 
-This will run the standalone desktop version.
+* Press **Q** to exit and write the database/JSON logs.
+* Press **R** to reset active scores.
+* Press **S** to save an intermediate snapshot.
 
-### 🌐 WEB DASHBOARD (RECOMMENDED)
-
-For the modern Brutalist UI experience:
+### 2. Running the Flask Web Dashboard
+To start the web server and view the dashboard in a web browser:
 
 ```bash
 cd backend
 python app.py
 ```
 
-1. Open your browser to `http://127.0.0.1:5000`
-2. Grant camera permissions if prompted.
-3. Used for real-time monitoring with graphical charts.
-
-This version features:
-- Live video stream with HUD overlay
-- Real-time risk meter and anomaly graph
-- Status indicators for Face, Gaze, Phone, and Audio
-- Alert logging system
-
-### Advanced Usage (Video File)
-
-Modify the last line in `silent_invigilator.py`:
-
-```python
-invigilator.run('path/to/exam_recording.mp4')
-```
-
-### Keyboard Controls
-
-| Key | Action |
-|-----|--------|
-| `Q` | Quit monitoring and generate final report |
-| `S` | Save current report (without quitting) |
-| `R` | Reset alerts and anomaly scores |
+Open a web browser and navigate to `http://127.0.0.1:5000`. The interface will display a real-time graph of the candidate's anomaly score, active alerts, and an annotated video feed.
 
 ---
 
-## 📊 OUTPUT EXAMPLES
+## Configuration and Parameter Tuning
 
-### Console Output
-
-```
-╔════════════════════════════════════════════════════════════════════╗
-║              🎓 THE SILENT INVIGILATOR v2.0 🎓                     ║
-║        Autonomous Real-Time Exam Malpractice Detection            ║
-╚════════════════════════════════════════════════════════════════════╝
-
-🔧 Initializing Silent Invigilator System...
-  ✓ Loading MediaPipe Face Mesh...
-  ✓ Loading MediaPipe Pose Estimation...
-  ✓ Loading MediaPipe Hand Detection...
-  ✓ Loading YOLOv8 Nano model...
-  ✓ YOLOv8 loaded successfully
-✅ Initialization Complete!
-
-📹 Monitoring Started...
-
-Controls:
-  [Q] - Quit and generate report
-  [S] - Save current report
-  [R] - Reset alerts
-----------------------------------------------------------------------
-
-📋 EXAM SUMMARY
-======================================================================
-⏱  Duration: 3m 42s
-🎞  Total Frames: 6742
-⚠  Suspicious Frames: 284 (4.2%)
-🚨 Total Alerts: 12
-
-📊 Anomaly Scores:
-   Average: 18.45
-   Maximum: 87.30
-   Minimum: 0.00
-
-🎯 VERDICT: MODERATE RISK
-💡 Manual review suggested. Some suspicious behaviors observed.
-======================================================================
-```
-
-### JSON Report Structure
-
-```json
-{
-  "exam_session": {
-    "start_time": "2025-12-14 10:30:15",
-    "duration_seconds": 222.45,
-    "duration_formatted": "3m 42s"
-  },
-  "statistics": {
-    "total_frames_analyzed": 6742,
-    "suspicious_frames": 284,
-    "suspicious_percentage": 4.21,
-    "total_alerts": 12,
-    "average_anomaly_score": 18.45,
-    "max_anomaly_score": 87.30,
-    "min_anomaly_score": 0.00
-  },
-  "behavior_analysis": {
-    "avg_head_yaw": 12.34,
-    "avg_head_pitch": 8.76,
-    "avg_gaze_deviation": 0.043,
-    "looking_away_frames": 145,
-    "phone_detected_frames": 8,
-    "multiple_faces_detected": 2
-  },
-  "alerts": [
-    {
-      "timestamp": "2025-12-14 10:31:47.234",
-      "frame_number": 2543,
-      "score": 75,
-      "detections": [
-        "Looking RIGHT (32.4°)",
-        "🔴 Prolonged right gaze"
-      ],
-      "flags": { ... }
-    }
-  ],
-  "verdict": {
-    "status": "MODERATE RISK",
-    "color": "YELLOW",
-    "avg_anomaly_score": 18.45,
-    "total_alerts": 12,
-    "suspicious_frame_ratio": 0.042,
-    "recommendation": "Manual review suggested..."
-  }
-}
-```
-
----
-
-## 🎨 GUI OVERLAY EXPLAINED
-
-### Status Indicators
-
-- **Top Left:**
-  - Yaw angle (left/right head rotation)
-  - Pitch angle (up/down head rotation)
-  - Gaze status (OK / AWAY)
-
-- **Top Right:**
-  - Elapsed time
-  - Current frame number
-  - FPS (frames per second)
-
-- **Bottom Status Bar:**
-  - Anomaly Score (color-coded)
-  - Current Status ("✓ Focused", "Looking LEFT", etc.)
-  - Total Alerts
-
-- **Alert Banner (when triggered):**
-  - Red background overlay
-  - "🚨 MALPRACTICE ALERT!" text
-
----
-
-## ⚙️ CONFIGURATION
-
-### Threshold Tuning
-
-Edit thresholds in `__init__` method:
+All system thresholds can be customized in the configuration dictionary within the `VideoCamera` class (`camera.py`) or `SilentInvigilator` class (`silent_invigilator.py`):
 
 ```python
 self.thresholds = {
-    'head_yaw_max': 30,          # degrees (left/right)
-    'head_pitch_max': 25,        # degrees (up/down)
-    'gaze_deviation_max': 0.06,  # normalized units
-    'sustained_look_away_frames': 45,  # ~1.5 sec
-    'phone_confidence': 0.5,     # YOLO confidence
-    'multiple_faces_frames': 15, # ~0.5 sec
+    'head_yaw_max': 30,          # Maximum allowable yaw rotation (degrees)
+    'head_pitch_max': 25,        # Maximum allowable pitch rotation (degrees)
+    'gaze_deviation_max': 0.06,  # Maximum normalized horizontal gaze deviation
+    'sustained_look_away_frames': 45, # Duration before an alert is triggered (~1.5s)
+    'phone_confidence': 0.50,    # Minimum confidence score for YOLO phone detection
+    'multiple_faces_frames': 15, # Frame threshold for multiple face alerts (~0.5s)
 }
 ```
 
-### Anomaly Score Weights
-
-Modify scoring in `detect_suspicious_behavior()`:
-
-- Multiple persons: **+40 points**
-- Head turned beyond threshold: **+25 points**
-- Eyes looking away: **+15 points**
-- Phone detected: **+50 points**
-- Sustained inattention: **+30 points**
-
-**Alert Trigger:** Score > 60
+### Parameter Scoring Weights
+Weights are located in the anomaly scoring function:
+* Phone Detection: **+50 points**
+* Multiple Face Detection: **+40 points**
+* Out-of-bounds Head Rotation: **+25 points**
+* Eye Gaze Aversion: **+15 points**
 
 ---
 
-## 🔬 TECHNICAL DETAILS
+## Performance Optimization
 
-### Head Pose Estimation Algorithm
+To achieve real-time performance on lower-tier hardware (e.g., integrated GPUs or older CPUs):
 
-Uses **solvePnP** (Perspective-n-Point) algorithm:
-1. Extract 3D facial landmarks (x, y, z) from MediaPipe
-2. Project to 2D image coordinates
-3. Estimate camera matrix (focal length, principal point)
-4. Solve for rotation and translation vectors
-5. Decompose rotation matrix into Euler angles (pitch, yaw, roll)
-
-### Eye Gaze Tracking
-
-1. Locate iris centers (landmarks 468, 473)
-2. Calculate eye region centers
-3. Measure Euclidean distance between iris and eye center
-4. Average left and right eye deviations
-5. Normalize to 0-1 range
-
-### Temporal Behavior Filtering
-
-Uses **deque** data structures with 60-frame sliding windows:
-- Filters momentary movements
-- Detects sustained patterns (>45 frames = 1.5 seconds)
-- Implements flag-based streak counting
+1. **Limit Resolution**: Initialize the video capture stream at $640 \times 480$ rather than $1280 \times 720$.
+2. **Frame Skipping**: Modify the main loops to perform YOLOv8 inferences only once every $N$ frames (e.g., $N=15$), while using MediaPipe landmark interpolation for the intermediate frames.
+3. **Hardware Acceleration**: If an NVIDIA GPU is available, install CUDA-supported PyTorch to accelerate YOLOv8 model evaluations:
+   ```bash
+   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+   ```
 
 ---
 
-## 📁 PROJECT STRUCTURE
+## References and Acknowledgements
 
-```text
-silent-invigilator/
-│
-├── backend/                  # Python Flask backend & ML models
-│   ├── app.py                # Web Dashboard application
-│   ├── silent_invigilator.py # Standalone desktop application
-│   ├── camera.py             # CV and ML logic
-│   ├── requirements.txt      # Python dependencies
-│   ├── yolov8n.pt            # YOLOv8 weights (auto-downloaded)
-│   ├── static/               # Web assets (CSS, JS, Images)
-│   ├── templates/            # HTML templates
-│   └── exam_report_*.json    # Generated reports
-│
-├── mobile_app/               # Flutter mobile application
-│
-├── docs/                     # Documentation files
-│   ├── EXECUTION_PLAN.md     # Project execution plan
-│   └── project.txt           # React UI specification
-│
-├── run_standalone.bat        # Windows launcher for desktop mode
-├── run_web.bat               # Windows launcher for web dashboard
-├── README.md                 # This file
-└── QUICKSTART.md             # Quick start guide
-```
-
----
-
-## 🐛 TROUBLESHOOTING
-
-### Issue: "Camera access denied"
-**Solution:** Grant camera permissions to Python/Terminal
-
-### Issue: YOLOv8 not loading
-**Solution:** Ensure internet connection for initial download of `yolov8n.pt`
-
-### Issue: Low FPS / Lag
-**Solutions:**
-- Reduce camera resolution
-- Disable YOLOv8 (set `self.use_yolo = False`)
-- Use lighter face mesh connections (FACEMESH_CONTOURS instead of TESSELATION)
-
-### Issue: Too many false positives
-**Solution:** Increase threshold values in configuration
-
-### Issue: Missing detections
-**Solution:** Decrease MediaPipe confidence thresholds (currently 0.6)
-
----
-
-## 🚀 PERFORMANCE OPTIMIZATION
-
-### Speed Improvements
-
-1. **Use GPU acceleration** (CUDA for YOLO)
-2. **Lower camera resolution** (640x480 instead of 1280x720)
-3. **Reduce MediaPipe face count** (max_num_faces=1)
-4. **Skip frames** (process every 2nd or 3rd frame)
-
-### Accuracy Improvements
-
-1. **Increase detection confidence** (0.7 instead of 0.6)
-2. **Calibrate thresholds** for specific exam environments
-3. **Add more YOLO classes** (books, papers, etc.)
-4. **Implement audio analysis** for voice detection
-
----
-
-## 📜 LICENSE
-
-This project is for educational and research purposes.
-
----
-
-## 👨‍💻 DEVELOPER NOTES
-
-### Future Enhancements
-
-- [ ] Multi-student monitoring (grid view)
-- [ ] Audio analysis for voice detection
-- [ ] Cloud-based report storage
-- [ ] Real-time dashboard (web interface)
-- [ ] Machine learning anomaly detection (LSTM)
-- [ ] Exam session scheduling
-- [ ] Automated email alerts
-
----
-
-## 🙏 ACKNOWLEDGMENTS
-
-- **MediaPipe** by Google Research
-- **Ultralytics YOLOv8** for object detection
-- **OpenCV** community
-
----
-
-## 📞 SUPPORT
-
-For issues or questions, please check:
-1. Troubleshooting section above
-2. MediaPipe documentation: https://google.github.io/mediapipe/
-3. YOLOv8 docs: https://docs.ultralytics.com/
-
----
-
-**Built with ❤️ for academic integrity**
+* **Google MediaPipe**: Keypoint tracking and landmark geometries.
+* **Ultralytics YOLOv8**: Object detection framework.
+* **OpenCV**: Open-source Computer Vision library.
+* **solvePnP**: Perspective-n-Point pose calculation method.
