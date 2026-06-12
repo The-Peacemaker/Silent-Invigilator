@@ -311,6 +311,7 @@ class VideoCamera:
                 risk = 0
                 det_list = []
 
+                # ALGO-6.1.3: PROHIBITED_OBJECT_DETECTION (YOLO)
                 # ─── YOLO Object Detection (every 15th frame) ───
                 if yolo and self.frame_count % 15 == 0:
                     try:
@@ -505,6 +506,7 @@ class VideoCamera:
         with self.lock:
             self.output_frame = jpeg.tobytes()
 
+    # ALGO-6.1.1: 3D_HEAD_POSE_ESTIMATION
     def _head_pose(self, landmarks, img_w, img_h):
         """solvePnP-based head pose estimation → (pitch, yaw) in degrees."""
         pts_2d = []
@@ -534,6 +536,7 @@ class VideoCamera:
         angles, _, _, _, _, _ = cv2.RQDecomp3x3(rmat)
         return angles[0], angles[1]   # pitch, yaw
 
+    # ALGO-6.1.2: EYE_GAZE_TRACKING
     def _gaze(self, landmarks):
         """Simple iris-based gaze direction."""
         try:
@@ -675,6 +678,7 @@ class DemoCamera:
         idx = self.active_camera_index if self.active_camera_index is not None else self.requested_camera_index
         return f"camera_{idx}"
 
+    # ALGO-6.1.1: 3D_HEAD_POSE_ESTIMATION
     def _head_pose(self, landmarks, img_w, img_h):
         """Estimate head pose using real MediaPipe landmarks + solvePnP."""
         # Key landmark indices
@@ -699,6 +703,7 @@ class DemoCamera:
         angles, _, _, _, _, _ = cv2.RQDecomp3x3(rmat)
         return angles[0] * 360, angles[1] * 360  # pitch, yaw
 
+    # ALGO-6.1.2: EYE_GAZE_TRACKING
     def _gaze_direction(self, landmarks, img_w, img_h):
         """Compute gaze direction from pupil position relative to eye corners."""
         # Left eye: 33 (outer), 133 (inner), 468 (iris center)
@@ -726,6 +731,7 @@ class DemoCamera:
         except:
             return "Center"
 
+    # ALGO-6.1.4: STUDENT_TRACKING (IoU-based fallback)
     def _update_tracks(self, person_boxes, now_ts):
         """
         Lightweight IoU-based tracker for persistent student IDs.
@@ -790,6 +796,7 @@ class DemoCamera:
                 merged.append(box)
         return merged
 
+    # ALGO-6.1.4: STUDENT_TRACKING (ByteTrack)
     def _run_bytetrack(self, frame, w, h, now_ts):
         """Run true ByteTrack through Ultralytics tracking API and update self.tracks."""
         if self.yolo is None or not self.use_bytetrack:
@@ -862,6 +869,7 @@ class DemoCamera:
                 print(f"[AI] ByteTrack error: {e}")
             return False
 
+    # ALGO-6.1.6: ALERT_GENERATION (queue for DB logger + realtime emit)
     def _enqueue_student_alert(self, student, now_ts, phone_hit=False, book_hit=False):
         sid = int(student['id'])
         score = float(student['score'])
@@ -921,6 +929,7 @@ class DemoCamera:
             self.pending_alert_events.clear()
         return events
 
+    # ALGO-6.1.5: RISK_SCORING (weighted composite)
     def _compute_track_score(self, trk, phone_hit, book_hit, gaze, pose):
         """Temporal cheating confidence score (0-100) per student track."""
         trk['gaze_hist'].append(gaze)
@@ -1073,6 +1082,7 @@ class DemoCamera:
                 # Keep cached persons from active tracks for compatibility
                 self.cached_persons = [trk['bbox'] for trk in self.tracks.values() if trk.get('lost', 0) == 0]
 
+                # ALGO-6.1.3: PROHIBITED_OBJECT_DETECTION (YOLO + SAHI)
                 # ─── Small-object detection (YOLO + SAHI slicing) ───
                 if self.yolo and self.frame_count % self.yolo_interval == 0:
                     try:

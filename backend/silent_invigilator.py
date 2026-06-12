@@ -141,6 +141,7 @@ class SilentInvigilator:
         
         print("✅ Initialization Complete!\n")
         
+    # ALGO-6.1.1: 3D_HEAD_POSE_ESTIMATION
     def calculate_head_pose(self, landmarks, image_shape):
         """
         Calculate head pose angles (pitch, yaw, roll) using 3D-to-2D perspective projection
@@ -195,6 +196,7 @@ class SilentInvigilator:
         
         return pitch, yaw, roll
     
+    # ALGO-6.1.2: EYE_GAZE_TRACKING
     def get_gaze_ratio(self, landmarks):
         """
         Calculate the ratio of the iris position relative to eye corners.
@@ -253,6 +255,7 @@ class SilentInvigilator:
         return self.stabilizers['mouth'].update(mar)
     
     
+    # ALGO-6.1.3: PROHIBITED_OBJECT_DETECTION
     def detect_objects_yolo(self, frame):
         """
         Detect mobile phones and other prohibited objects using YOLOv8
@@ -380,6 +383,7 @@ class SilentInvigilator:
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         
+        # ALGO-6.1.5: RISK_SCORING (composite anomaly score)
         anomaly_score = 0
         detections = []
         
@@ -517,6 +521,7 @@ class SilentInvigilator:
         if anomaly_score > 40: self.suspicious_frames += 1
         
         # Generate Alert
+        # ALGO-6.1.6: ALERT_GENERATION (local alert banner + capture)
         if anomaly_score > 60:
             alert = {
                 'timestamp': datetime.now().strftime('%H:%M:%S'),

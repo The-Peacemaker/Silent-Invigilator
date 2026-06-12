@@ -533,6 +533,7 @@ def get_runtime_camera_source():
             pass
     return 'camera_0'
 
+# ALGO-6.1.6: ALERT_GENERATION_AND_DATABASE_LOGGING
 # ── BACKGROUND LOGGER ────────────────────────────────────
 def background_monitor():
     """
