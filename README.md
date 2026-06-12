@@ -13,7 +13,7 @@ By fusing keypoint-based geometric tracking (gaze, head orientation, and facial 
 The Silent Invigilator processes input video streams through a modular sequential pipeline. The frame processing pipeline is divided into three primary layers:
 
 1. **Feature Extraction Layer**: Leverages Google MediaPipe Face Mesh, Hand Landmark, and Pose detection libraries to extract dense 3D facial geometry (468 landmarks), bilateral hand skeletons (21 landmarks per hand), and joint coordinates.
-2. **Deep Learning Inference Layer**: Runs a lightweight YOLOv8 model for prohibited object detection (e.g., mobile phones) in parallel with an IoU-based tracking filter (ByteTrack) to identify and track multiple candidates.
+2. **Deep Learning Inference Layer**: Runs a lightweight YOLOv8 model for prohibited object detection (mobile phones and books/papers) in parallel with an IoU-based tracking filter (ByteTrack) to identify and track multiple candidates.
 3. **Heuristic and Scoring Layer**: Evaluates extracted geometric parameters against mathematical indicators, updates a sliding-window temporal queue, computes a composite anomaly score, and writes incidents asynchronously to an SQLite database.
 
 ![System Architecture](report/system_architecture.png)
@@ -24,97 +24,113 @@ The Silent Invigilator processes input video streams through a modular sequentia
 
 ### 1. 3D Head Pose Estimation (Perspective-n-Point)
 
-To estimate head orientation in three-dimensional space without requiring dedicated depth sensors, the system solves the Perspective-n-Point (PnP) problem. Given a set of $n$ 3D facial reference points in world coordinates (based on an anthropometric model) and their corresponding 2D projections on the image plane, we define the camera projection matrix.
+To estimate head orientation in three-dimensional space without requiring dedicated depth sensors, the system solves the Perspective-n-Point (PnP) problem. Given a set of $`n`$ 3D facial reference points in world coordinates (based on an anthropometric model) and their corresponding 2D projections on the image plane, we define the camera projection matrix.
 
-Let $P_w = [X_w, Y_w, Z_w, 1]^T$ be a 3D point in world coordinates, and $p = [u, v, 1]^T$ be its image projection. The pinhole camera model defines:
+Let $`P_w = [X_w, Y_w, Z_w, 1]^T`$ be a 3D point in world coordinates, and $`p = [u, v, 1]^T`$ be its image projection. The pinhole camera model defines:
 
-$$s \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K [R \mid T] \begin{bmatrix} X_w \\ Y_w \\ Z_w \\ 1 \end{bmatrix}$$
+```math
+s \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K \begin{bmatrix} R & T \end{bmatrix} \begin{bmatrix} X_w \\ Y_w \\ Z_w \\ 1 \end{bmatrix}
+```
 
 Where:
-* $s$ is an arbitrary scale factor.
-* $K$ is the camera intrinsic matrix, initialized using the frame resolution boundaries and focal length approximation:
-  $$K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}$$
-* $R \in SO(3)$ is the rotation matrix, and $T \in \mathbb{R}^3$ is the translation vector.
+* $`s`$ is an arbitrary scale factor.
+* $`K`$ is the camera intrinsic matrix, initialized using the frame resolution boundaries and focal length approximation:
+  ```math
+  K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}
+  ```
+* $`R \in SO(3)`$ is the rotation matrix, and $`T \in \mathbb{R}^3`$ is the translation vector.
 
-We compute $R$ and $T$ by minimizing the reprojection error using Levenberg-Marquardt optimization:
+We compute $`R`$ and $`T`$ by minimizing the reprojection error using Levenberg-Marquardt optimization:
 
-$$\min_{R, T} \sum_{i=1}^n \left\| p_i - \text{proj}(K, R, T, P_{w,i}) \right\|^2$$
+```math
+\min_{R, T} \sum_{i=1}^n \left\| p_i - \text{proj}(K, R, T, P_{w,i}) \right\|_2^2
+```
 
-The rotation matrix $R$ is decomposed into Euler angles representing Pitch ($\theta$), Yaw ($\psi$), and Roll ($\phi$) by calculating:
+The rotation matrix $`R`$ is decomposed into Euler angles representing Pitch ($`\theta`$), Yaw ($`\psi`$), and Roll ($`\phi`$) by calculating the decomposition using OpenCV:
 
-$$\theta = \arctan2\left(-R_{20}, \sqrt{R_{00}^2 + R_{10}^2}\right)$$
-$$\psi = \arctan2(R_{10}, R_{00})$$
-$$\phi = \arctan2(R_{21}, R_{22})$$
+```math
+\theta = \text{RQDecomp3x3}(R)_x, \quad \psi = \text{RQDecomp3x3}(R)_y, \quad \phi = \text{RQDecomp3x3}(R)_z
+```
 
-A violation is flagged if $|\theta| > \theta_{\text{max}}$ or $|\psi| > \psi_{\text{max}}$.
+A violation is flagged if $`|\theta| > \theta_{\text{max}}`$ or $`|\psi| > \psi_{\text{max}}`$. In the implementation, six anthropometric landmarks are tracked: the nose tip (landmark index 1), chin (landmark index 152/199), left eye corner (landmark index 263), right eye corner (landmark index 33), left mouth corner (landmark index 287/61), and right mouth corner (landmark index 57/291).
 
 ### 2. Eye Gaze Tracking (Iris Center Deviation)
 
 Gaze tracking calculates the ratio of the iris center position relative to the horizontal boundaries of the eye. This index is robust against individual variations in eye shapes.
 
-Let $L_{\text{inner}}$ and $L_{\text{outer}}$ denote the 2D pixel coordinates of the inner and outer eye corners (derived from landmarks 133 and 33 for the left eye, and 362 and 263 for the right eye). Let $I_{\text{center}}$ be the centroid of the iris boundary landmarks (468 to 472 for the left eye). The horizontal gaze ratio $\gamma$ is formulated as:
+Let $`L_{\text{outer}}`$ and $`L_{\text{inner}}`$ denote the 2D pixel coordinates of the outer and inner eye corners. Let $`I_{\text{center}}`$ be the centroid of the iris boundary landmarks. The horizontal gaze ratio $`\gamma`$ is formulated as:
 
-$$\gamma = \frac{\| I_{\text{center}} - L_{\text{inner}} \|_2}{\| L_{\text{outer}} - L_{\text{inner}} \|_2}$$
+```math
+\gamma = \frac{\| I_{\text{center}} - L_{\text{outer}} \|_2}{\| L_{\text{inner}} - L_{\text{outer}} \|_2}
+```
 
-Where $\|\cdot\|_2$ denotes the Euclidean distance. The normalized gaze deviation $G_{\text{dev}}$ is defined as:
+Where $`\|\cdot\|_2`$ denotes the Euclidean distance. Ratios for both the left and right eyes are calculated independently and averaged:
 
-$$G_{\text{dev}} = \left| \gamma - \gamma_{\text{neutral}} \right|$$
+```math
+\gamma_{\text{avg}} = \frac{\gamma_{\text{left}} + \gamma_{\text{right}}}{2}
+```
 
-Where $\gamma_{\text{neutral}} \approx 0.5$ represents the baseline when the subject looks straight ahead. A gaze aversion event is registered if $G_{\text{dev}} > G_{\text{max}}$.
+The horizontal gaze direction is classified based on the average ratio $`\gamma_{\text{avg}}`$:
+* **Right**: $`\gamma_{\text{avg}} < 0.40`$
+* **Left**: $`\gamma_{\text{avg}} > 0.60`$
+* **Center**: $`0.40 \le \gamma_{\text{avg}} \le 0.60`$
 
-### 3. Talking Detection (Mouth Aspect Ratio - MAR)
+### 3. Mouth Aspect Ratio (Talking Detection)
 
-To detect oral communication (talking or reading aloud), the system measures the Mouth Aspect Ratio (MAR) over a sliding temporal window. 
+To detect oral communication (talking or reading aloud), the system measures the Mouth Aspect Ratio (MAR) over a sliding temporal window.
 
-Using the inner lip coordinates, let $p_1$ and $p_5$ represent the horizontal corner landmarks, and let $(p_2, p_8)$, $(p_3, p_7)$, and $(p_4, p_6)$ represent vertical landmark pairs across the upper and lower inner lips:
+Using the mouth coordinates, let $`p_{13}`$ and $`p_{14}`$ represent the top and bottom vertical inner lip landmarks, and let $`p_{61}`$ and $`p_{291}`$ represent the horizontal corner landmarks:
 
-$$\text{MAR} = \frac{\| p_2 - p_8 \|_2 + \| p_3 - p_7 \|_2 + \| p_4 - p_6 \|_2}{2 \| p_1 - p_5 \|_2}$$
+```math
+\text{MAR} = \frac{\| p_{13} - p_{14} \|_2}{\| p_{61} - p_{291} \|_2}
+```
 
-The raw MAR values are smoothed using an exponential moving average (EMA) to prevent false positives from brief facial expressions:
+The raw MAR values are smoothed using an exponential moving average (EMA) with a smoothing factor $`\alpha_{\text{mar}} = 0.3`$ to filter out brief facial ticks or expressions:
 
-$$\text{MAR}_{\text{smoothed}, t} = \alpha_{\text{mar}} \cdot \text{MAR}_t + (1 - \alpha_{\text{mar}}) \cdot \text{MAR}_{\text{smoothed}, t-1}$$
+```math
+\text{MAR}_{\text{smoothed}, t} = \alpha_{\text{mar}} \cdot \text{MAR}_t + (1 - \alpha_{\text{mar}}) \cdot \text{MAR}_{\text{smoothed}, t-1}
+```
 
-A talking event is triggered if $\text{MAR}_{\text{smoothed}, t} > \text{MAR}_{\text{threshold}}$.
+A talking event is triggered if $`\text{MAR}_{\text{smoothed}, t} > \text{MAR}_{\text{threshold}}`$.
 
 ### 4. Prohibited Object Detection (YOLOv8 & SAHI)
 
-For detecting unauthorized physical items (such as mobile phones), the system runs parallel YOLOv8 Nano inference. Let $I_f$ be the input frame of dimensions $W \times H$. The YOLO network outputs a set of bounding boxes $B = \{b_1, b_2, \dots, b_k\}$, where each box $b_i = (x_c, y_c, w, h, c, P_{\text{conf}})$:
-* $(x_c, y_c)$ represents the box center coordinates.
-* $(w, h)$ represents the width and height of the box.
-* $c$ represents the class identifier (e.g., class 67 for "cell phone" in MS COCO).
-* $P_{\text{conf}}$ represents the class probability.
+For detecting unauthorized physical items (such as mobile phones and paper/books), the system runs YOLOv8 inference. The network outputs bounding boxes represented as $`b_i = (x_{\text{min}}, y_{\text{min}}, x_{\text{max}}, y_{\text{max}}, c, P_{\text{conf}})`$, where $`c`$ is the COCO class identifier (`67` for cell phone, `73` for book) and $`P_{\text{conf}}`$ is the prediction confidence.
 
-To enhance small-object detection (such as a phone placed far from the camera lens), the system optionally integrates Slicing Aided Hyper Inference (SAHI). The frame $I_f$ is partitioned into overlapping grid slices of size $W_s \times H_s$ with an overlap ratio $\sigma$:
+To enhance small-object detection, the system integrates Slicing Aided Hyper Inference (SAHI). The frame is partitioned into overlapping slices of size $`W_s \times H_s`$ ($`320 \times 320`$) with an overlap ratio $`\sigma = 0.20`$:
 
-$$I_f = \bigcup_{m,n} S_{m,n}$$
+```math
+I_f = \bigcup_{m,n} S_{m,n}
+```
 
-Inference is executed on each slice independently, and predictions are aggregated using Non-Maximum Suppression (NMS) with an Intersection-over-Union (IoU) threshold $\beta_{\text{iou}}$ to resolve overlapping bounding box conflicts:
+Aggregated predictions are resolved using Non-Maximum Suppression (NMS) with an Intersection-over-Union (IoU) threshold of $`0.55`$ to resolve overlap conflicts:
 
-$$\text{IoU}(b_a, b_b) = \frac{\text{Area}(b_a \cap b_b)}{\text{Area}(b_a \cup b_b)}$$
+```math
+\text{IoU}(b_a, b_b) = \frac{\text{Area}(b_a \cap b_b)}{\text{Area}(b_a \cup b_b)} \ge 0.55
+```
 
 ### 5. Composite Spatial-Temporal Anomaly Scoring
 
-Malpractice is rarely defined by a single instant of behavioral deviation. Therefore, the system calculates a composite, time-averaged anomaly score at each frame $t$.
+For each tracked student, a risk score $`S_t`$ (range $`0`$ to $`100`$) is computed as a weighted combination of recent behavior:
 
-Let $X_t \in \{0, 1\}^5$ be a binary indicator vector representing active alerts at frame $t$:
-$$X_t = [I_{\text{phone}}, I_{\text{multiple\_faces}}, I_{\text{head\_pose}}, I_{\text{gaze}}, I_{\text{hand\_proximity}}]^T$$
+```math
+S_t = \text{mean}(R_{\text{history}})
+```
 
-We define a diagonal weight matrix $W$:
-$$W = \text{diag}(w_{\text{phone}}, w_{\text{multiple\_faces}}, w_{\text{head\_pose}}, w_{\text{gaze}}, w_{\text{hand\_proximity}})$$
+where $`R_{\tau}`$ at frame $`\tau`$ is defined as:
 
-The instantaneous anomaly score $A_t$ is calculated as:
+```math
+R_{\tau} = 100 \cdot \left( 0.40 \cdot O_{\tau} + 0.22 \cdot E_{\tau} + 0.16 \cdot H_{\tau} + 0.14 \cdot D_{\tau} + 0.08 \cdot C_{\tau} \right)
+```
 
-$$A_t = \min\left(100, \sum_{i=1}^5 W_{ii} X_{t,i}\right)$$
+Where:
+* $`O_{\tau} \in \{0, 0.45, 1.0\}`$ indicates object detection status ($`1.0`$ if a phone is detected, $`0.45`$ if a book/paper is detected, and $`0.0`$ otherwise). If a phone is present, $`R_{\tau}`$ is set to $`\max(R_{\tau}, 85)`$.
+* $`E_{\tau}`$ is the rolling gaze deviation (percentage of the last 90 frames where gaze was not Center).
+* $`H_{\tau}`$ is the rolling head pose deviation (percentage of the last 90 frames where head pose was not Center).
+* $`D_{\tau}`$ is the rolling head down-tilt deviation (percentage of the last 90 frames where head pose was Down).
+* $`C_{\tau}`$ is the short-term temporal alignment factor (percentage of the last 20 frames where gaze or head pose deviated from center).
 
-To filter out natural movements (such as looking down at a writing sheet), the system routes $A_t$ through a temporal sliding-window accumulator. Let $D_t$ be a FIFO queue containing the scores of the last $N$ frames (where $N$ corresponds to a 2-second buffer, approximately 60 frames):
-
-$$D_t = \{A_{t-N+1}, A_{t-N+2}, \dots, A_t\}$$
-
-The smoothed temporal anomaly score $S_t$ is the weighted mean of the sliding queue:
-
-$$S_t = \sum_{k=0}^{N-1} \lambda^k A_{t-k} \Big/ \sum_{k=0}^{N-1} \lambda^k$$
-
-Where $\lambda \in (0, 1]$ is a temporal decay parameter. When $S_t > \tau_{\text{alert}}$, a formal malpractice alert is logged to the backend and recorded in the database.
+When the overall score exceeds $`60`$, a formal malpractice alert is logged to the backend and recorded in the database.
 
 ---
 
